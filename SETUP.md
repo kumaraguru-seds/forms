@@ -4,7 +4,7 @@
 
 | File | Purpose |
 |---|---|
-| `forms.html` | **Admin form builder** — create & manage forms |
+| `index.html` | **Admin form builder** — create & manage forms |
 | `view-form.html` | **Respondent view** — fill and submit forms |
 | `Code.gs` | **Google Apps Script backend** — Sheets + Drive storage |
 
@@ -39,7 +39,7 @@
 
 ### Step 4: Connect to the builder
 
-1. Open **forms.html** in your browser (`http://127.0.0.1:5500/forms.html`)
+1. Open **index.html** in your browser (`http://127.0.0.1:5500/index.html` or `http://127.0.0.1:5500/`)
 2. Click the **⚙️ Settings** icon in the top-right
 3. Paste your Web App URL
 4. Click **Save & Connect**
@@ -59,7 +59,7 @@
 ### Admin Authentication & Security
 
 - **Default Admin Password**: `SEDS@Admin2026` (or `SEDS@2026`)
-- You will be prompted to enter the admin password when opening `forms.html`.
+- You will be prompted to enter the admin password when opening `index.html`.
 - You can change the password anytime in `Code.gs` under `CONFIG.ADMIN_PASSWORD`.
 - Use the **🔒 Lock / Logout** button in the top navigation bar to lock the admin portal anytime.
 
@@ -133,7 +133,7 @@ The same URL stays the same — no need to reconnect.
 Every form created can now have a custom short link on your subdomain (e.g. `https://forms.kumaraguruseds.space/my-event` or `https://forms.kumaraguruseds.space/feedback`).
 
 ### How to Create a Short Link:
-1. Open the form in `forms.html` and click **Publish / Share** (or Get Links).
+1. Open the form in `index.html` and click **Publish / Share** (or Get Links).
 2. Under the **🌟 SEDS Short URL & Custom Slug** section:
    - Enter your desired slug (e.g. `workshop-2026`).
    - Or click **🎲 Auto** to automatically generate a clean, brandable slug.
