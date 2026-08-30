@@ -4,8 +4,10 @@
 
 | File | Purpose |
 |---|---|
+| `config.js` | **Central configuration** — Google Apps Script URL & settings |
 | `index.html` | **Admin form builder** — create & manage forms |
 | `view-form.html` | **Respondent view** — fill and submit forms |
+| `404.html` | **Short URL router** — fast dynamic slug redirection |
 | `Code.gs` | **Google Apps Script backend** — Sheets + Drive storage |
 
 ---

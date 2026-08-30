@@ -8,6 +8,7 @@
   <link rel="icon" href="SEDS.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="config.js"></script>
   <style>
     :root{
       --bg:#070f1e;--text:#f0f4ff;--muted:#8da4c4;
@@ -561,10 +562,11 @@
 // =========================================================
 //  CONFIG
 // =========================================================
-const GAS_KEY         = 'seds_gas_url';
-const FORMS_KEY       = 'seds_forms_v2';
-const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
-let GAS_URL           = localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+const GAS_KEY         = window.SEDS_CONFIG?.GAS_KEY || 'seds_gas_url';
+const FORMS_KEY       = window.SEDS_CONFIG?.FORMS_KEY || 'seds_forms_v2';
+const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
+
+let GAS_URL = (window.getSedsGasUrl ? window.getSedsGasUrl() : null) || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
 
 // =========================================================
 //  STATE

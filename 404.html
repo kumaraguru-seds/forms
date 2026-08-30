@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="config.js"></script>
   <style>
     :root {
       --bg: #0b0f19;
@@ -347,7 +348,7 @@
       }
 
       // 3. Fallback: Check Apps Script for latest dynamic links
-      const SHORTENER_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
+      const SHORTENER_APPS_SCRIPT = (window.SEDS_CONFIG && window.SEDS_CONFIG.GAS_URL) || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
       try {
         const gasRes = await fetch(`${SHORTENER_APPS_SCRIPT}?action=lookupSlug&slug=${encodeURIComponent(slug)}`);
         if (gasRes.ok) {

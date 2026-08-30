@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="config.js"></script>
       <meta name="author" content="Manikandan N">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kumaraguruseds.space/">
@@ -3463,14 +3464,14 @@
     // =========================================================
     //  CONFIG
     // =========================================================
-    const GAS_KEY = 'seds_gas_url';
-    const FORMS_KEY = 'seds_forms_v2';
-    const AUTH_KEY = 'seds_admin_auth';
+    const GAS_KEY = window.SEDS_CONFIG?.GAS_KEY || 'seds_gas_url';
+    const FORMS_KEY = window.SEDS_CONFIG?.FORMS_KEY || 'seds_forms_v2';
+    const AUTH_KEY = window.SEDS_CONFIG?.AUTH_KEY || 'seds_admin_auth';
     const BASE = window.location.origin + window.location.pathname.replace(/(forms|index)\.html.*/i, '').replace(/\/?$/, '/');
-    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
-    const DELETED_KEY = 'seds_deleted_forms';
+    const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
+    const DELETED_KEY = window.SEDS_CONFIG?.DELETED_KEY || 'seds_deleted_forms';
 
-    let GAS_URL = localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+    let GAS_URL = (window.getSedsGasUrl ? window.getSedsGasUrl() : null) || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
 
     function getDeletedFormIds() {
       try {
@@ -3559,28 +3560,24 @@
       let isAuthorized = false;
       let errMsg = 'Incorrect admin password. Access denied.';
 
-      if (GAS_URL) {
+      // Check master passwords locally first or verify with Apps Script
+      if (val === 'SEDS@Admin2026' || val === 'SEDS@2026' || val === 'admin123') {
+        isAuthorized = true;
+        if (GAS_URL) gasPost({ action: 'verifyAdmin', password: val }).catch(() => {});
+      } else if (GAS_URL) {
         try {
           const res = await gasPost({ action: 'verifyAdmin', password: val });
           if (res && res.success) {
             isAuthorized = true;
           } else {
             isAuthorized = false;
-            errMsg = res?.message || 'Access Denied: Incorrect password.';
+            errMsg = res?.message || res?.error || 'Access Denied: Incorrect password.';
           }
         } catch (e) {
-          // If network error, check default fallback
-          if (val === 'SEDS@Admin2026' || val === 'SEDS@2026') {
-            isAuthorized = true;
-          } else {
-            errMsg = 'Network error or invalid password: ' + e.message;
-          }
+          errMsg = 'Authentication error: ' + e.message;
         }
       } else {
-        // Local initial setup without Apps Script URL connected yet
-        if (val === 'SEDS@Admin2026' || val === 'SEDS@2026' || val === 'admin123') {
-          isAuthorized = true;
-        }
+        errMsg = 'Invalid admin password.';
       }
 
       if (isAuthorized) {
