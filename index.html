@@ -2681,25 +2681,25 @@
       .resp-main-card { padding: 20px 18px; }
       .resp-header-row { flex-wrap: wrap; gap: 10px; }
       .resp-actions-group { flex-wrap: wrap; gap: 6px; }
-      .q-sidebar { width: 200px; min-width: 180px; }
-      .q-toolbar { flex-wrap: wrap; gap: 6px; }
+      .right-toolbar { width: 46px; top: 110px; }
+      .type-sel-btn { min-width: 160px; }
     }
 
     /* ── Tablets (≤768px) ── */
     @media (max-width: 768px) {
       /* Header */
-      .app-header { padding: 8px 14px; height: 58px; }
-      .logo-kct  { height: 44px; }
-      .logo-seds { height: 52px; }
+      .app-header { padding: 8px 12px; height: 56px; gap: 4px; }
+      .logo-kct  { height: 42px; }
+      .logo-seds { height: 50px; }
       .brand-label { display: none; }
-      .header-title { font-size: 14px; margin: 0 8px; max-width: 200px; }
+      .header-title { font-size: 13px; margin: 0 6px; max-width: 180px; }
       .header-actions { gap: 2px; }
       .btn-primary { padding: 7px 12px; font-size: 12px; }
       .btn-primary span.material-icons-round { font-size: 16px; }
 
       /* Tabs */
-      .tabs-bar { overflow-x: auto; justify-content: flex-start; top: 52px; }
-      .tab-btn { padding: 12px 16px; font-size: 12px; white-space: nowrap; }
+      .tabs-bar { overflow-x: auto; justify-content: flex-start; top: 52px; -webkit-overflow-scrolling: touch; }
+      .tab-btn { padding: 12px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
 
       /* Dashboard */
       .dash-wrap { padding: 18px 12px; }
@@ -2708,21 +2708,35 @@
       .forms-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
       .new-card { padding: 28px 20px; min-height: 140px; }
 
-      /* Editor */
-      .editor-layout { flex-direction: column; padding: 12px; }
-      .q-sidebar { width: 100%; min-width: unset; position: static; max-height: none; }
-      .q-sidebar-inner { flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 10px; }
-      .q-list-item { flex: 0 0 auto; }
-      .builder-area { width: 100%; }
-      .q-card { padding: 18px 16px; }
-      .q-toolbar { flex-wrap: wrap; padding: 10px 14px; gap: 6px; }
-      .q-toolbar-left, .q-toolbar-right { flex-wrap: wrap; gap: 6px; }
-      .scale-sel, .sel-inp { font-size: 12px !important; }
+      /* Editor — stack vertically, move right-toolbar to bottom bar */
+      .editor-layout { flex-direction: column; padding: 10px; gap: 10px; }
+      .builder-area { width: 100%; min-width: 0; }
+      .right-toolbar {
+        position: static;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-radius: 14px;
+        padding: 8px 10px;
+        gap: 4px;
+        justify-content: center;
+        order: -1;
+      }
+      .tb-tip { display: none; }
+      .tb-sep { width: 1px; height: 24px; margin: 0 4px; }
+      .q-card { padding: 18px 14px; }
+      .q-header { flex-wrap: wrap; }
+      .type-sel-btn { min-width: 140px; font-size: 11px; }
+      .q-footer { flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+      .q-footer-sep { display: none; }
+      .req-toggle { font-size: 11px; }
       .ft-input { font-size: 22px; }
+      .section-card { padding: 18px 14px; }
+      #globalTypeDD { max-width: calc(100vw - 24px); left: 12px !important; }
 
       /* Responses */
-      .resp-subtabs-bar { overflow-x: auto; flex-wrap: nowrap; }
-      .resp-subtab { padding: 8px 14px; font-size: 12px; white-space: nowrap; }
+      .resp-subtabs-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+      .resp-subtab { padding: 8px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
       .resp-main-card { padding: 16px 12px; }
       .resp-header-row { flex-direction: column; align-items: flex-start; gap: 10px; }
       .resp-count-title { font-size: 20px; }
@@ -2739,7 +2753,7 @@
       .modal-box { width: 96vw !important; max-width: 96vw !important; padding: 24px 16px !important; }
       .modal-title { font-size: 18px !important; }
 
-      /* Form cards */
+      /* Form cards on dashboard */
       .fc-actions { opacity: 1; }
       .fc-action-btn { width: 30px; height: 30px; }
     }
@@ -2747,87 +2761,100 @@
     /* ── Mobile (≤600px) ── */
     @media (max-width: 600px) {
       /* Header */
-      .app-header { padding: 6px 10px; height: 52px; gap: 6px; }
-      .logo-kct  { height: 36px; }
-      .logo-seds { height: 44px; }
-      .header-title { font-size: 13px; max-width: 130px; margin: 0 6px; }
-      .icon-btn  { width: 34px; height: 34px; }
+      .app-header { padding: 5px 8px; height: 50px; gap: 3px; }
+      .logo-kct  { height: 34px; }
+      .logo-seds { height: 42px; }
+      .left-header { gap: 8px; }
+      .header-title { display: none; }           /* hide title input on mobile — saves space */
+      .icon-btn  { width: 32px; height: 32px; }
       .icon-btn .material-icons-round { font-size: 18px; }
 
       /* Tabs */
-      .tabs-bar { top: 46px; }
+      .tabs-bar { top: 44px; }
       .tab-btn { padding: 10px 12px; font-size: 11px; }
       .tab-badge { font-size: 9px; min-width: 15px; height: 15px; }
 
       /* Dashboard */
-      .dash-wrap { padding: 12px 10px; }
-      .dash-hero { padding: 18px 14px; border-radius: 14px; }
+      .dash-wrap { padding: 10px 8px; }
+      .dash-hero { padding: 16px 12px; border-radius: 14px; gap: 12px; }
       .dash-hero h1 { font-size: 18px; }
       .dash-hero p { font-size: 12px; }
       .forms-grid { grid-template-columns: 1fr; gap: 10px; }
-      .new-card { padding: 22px 16px; min-height: 120px; }
-      .new-card .material-icons-round { font-size: 34px; }
-      .setup-banner { flex-direction: column; align-items: flex-start; font-size: 12px; }
+      .new-card { padding: 20px 14px; min-height: 110px; }
+      .new-card .material-icons-round { font-size: 32px; }
+      .setup-banner { flex-direction: column; align-items: flex-start; font-size: 12px; padding: 12px; }
 
       /* Editor */
-      .editor-layout { padding: 8px 6px; gap: 8px; }
-      .form-title-card { padding: 20px 14px; border-radius: 12px; }
+      .editor-layout { padding: 6px 4px; gap: 8px; }
+      .form-title-card { padding: 18px 12px; border-radius: 12px; }
       .ft-input { font-size: 18px; }
       .fd-input { font-size: 13px; }
-      .q-card { padding: 14px 12px; border-radius: 12px; }
-      .q-body { padding: 14px 12px; }
-      .q-toolbar { padding: 8px 10px; gap: 4px; }
-      .add-opt-btn { font-size: 12px; }
-      .scale-options { flex-wrap: wrap; gap: 6px; }
-      .scale-opt-btn { min-width: 36px; height: 36px; font-size: 13px; }
-      .opt-row { flex-wrap: wrap; gap: 6px; }
-
-      /* Section nav */
+      .q-card { padding: 14px 10px; border-radius: 12px; }
+      .q-body { padding: 12px 10px; }
+      .q-header { gap: 6px; }
+      .q-title-input { font-size: 14px; }
+      .type-sel-btn { min-width: 0; width: 100%; font-size: 11px; padding: 7px 8px; }
+      .q-footer { flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+      .req-toggle { font-size: 11px; }
+      .right-toolbar { padding: 6px 8px; gap: 2px; border-radius: 12px; }
+      .tb-btn { width: 34px; height: 34px; }
+      .tb-btn .material-icons-round { font-size: 18px; }
+      .add-opt-btn, .add-opt-link { font-size: 12px; }
+      .scale-row { flex-wrap: wrap; gap: 6px; }
+      .scale-options { flex-wrap: wrap; gap: 4px; }
+      .scale-opt-btn { min-width: 32px; height: 32px; font-size: 12px; }
+      .opt-row { flex-wrap: nowrap; }
+      .file-upload-box { padding: 18px 10px; }
+      .section-card { padding: 16px 10px; }
+      .section-title-inp { font-size: 16px; }
       .section-nav-pill { font-size: 11px; padding: 3px 8px; }
+      #globalTypeDD { max-width: calc(100vw - 16px); left: 8px !important; min-width: 0; width: calc(100vw - 16px); }
 
       /* Responses */
       .resp-subtabs-bar { overflow-x: auto; flex-wrap: nowrap; }
-      .resp-subtab { white-space: nowrap; padding: 8px 12px; font-size: 11px; }
-      .resp-main-card { padding: 12px 10px; border-radius: 12px; }
+      .resp-subtab { white-space: nowrap; padding: 8px 11px; font-size: 11px; flex-shrink: 0; }
+      .resp-main-card { padding: 10px 8px; border-radius: 12px; }
       .resp-count-title { font-size: 18px; }
       .resp-count { font-size: 24px; }
       .resp-actions-group { gap: 4px; flex-wrap: wrap; }
       .resp-sheets-btn { font-size: 12px; padding: 7px 10px; }
-      .resp-card { padding: 14px 12px; }
+      .resp-card { padding: 12px 10px; border-radius: 12px; }
       .resp-card-title { font-size: 13px; }
-      .resp-indiv-preview-wrap { padding: 10px 4px; }
+      .resp-indiv-preview-wrap { padding: 8px 2px; }
       .resp-stepper-group { flex-wrap: wrap; gap: 6px; }
-      .resp-step-btn { padding: 7px 10px; font-size: 12px; }
+      .resp-step-btn { padding: 6px 10px; font-size: 12px; }
       .resp-step-indicator { font-size: 12px; }
       .chart-bar-label { font-size: 11px; }
 
       /* Settings */
-      .settings-wrap { padding: 10px 8px; }
-      .settings-section { padding: 14px 12px; border-radius: 12px; }
+      .settings-wrap { padding: 8px 6px; }
+      .settings-section { padding: 12px 10px; border-radius: 12px; }
       .settings-section h3 { font-size: 14px; }
-      .modal-input { font-size: 13px; }
+      .settings-row { flex-direction: column; gap: 8px; }
+      .modal-input { font-size: 13px; padding: 10px 12px; }
 
       /* Toast */
-      .toast { right: 10px; bottom: 10px; left: 10px; min-width: unset; width: auto; font-size: 13px; }
+      .toast { right: 8px; bottom: 8px; left: 8px; min-width: unset; width: auto; font-size: 13px; border-radius: 10px; }
 
       /* Auth modal */
-      .modal-box { padding: 20px 14px !important; }
-      #adminAuthModal .modal-box img { height: 50px !important; }
+      .modal-box { padding: 18px 12px !important; }
+      #adminAuthModal .modal-box img { height: 48px !important; }
     }
 
     /* ── Small Mobile (≤400px) ── */
     @media (max-width: 400px) {
-      .app-header { height: 48px; }
-      .logo-kct  { height: 30px; }
-      .logo-seds { height: 38px; }
-      .header-title { max-width: 100px; font-size: 12px; }
+      .app-header { height: 46px; }
+      .logo-kct  { height: 28px; }
+      .logo-seds { height: 36px; }
       .dash-hero h1 { font-size: 16px; }
       .ft-input { font-size: 16px; }
       .tab-btn { padding: 8px 10px; font-size: 10px; }
       .resp-count-title { font-size: 16px; }
       .resp-count { font-size: 20px; }
-      .resp-subtab { padding: 6px 10px; font-size: 10px; }
+      .resp-subtab { padding: 6px 9px; font-size: 10px; }
       .btn-primary { padding: 6px 10px; font-size: 11px; }
+      .type-sel-btn { font-size: 10px; padding: 6px 7px; }
+      .tb-btn { width: 30px; height: 30px; }
     }
   </style>
 </head>
