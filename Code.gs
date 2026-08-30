@@ -12,8 +12,9 @@ var CONFIG = {
   ADMIN_PASSWORD:   'SEDS@Admin2026',          // Admin login password
   SEDS_LOGO_URL:    'https://kumaraguruseds.space/SEDS.png',
   SEDS_NAME:        'Kumaraguru SEDS',
-  BASE_URL:         'http://127.0.0.1:5500/',  // ← update to your real domain if deployed
-  SHORT_DOMAIN_BASE:'https://kumaraguruseds.space/',
+  BASE_URL:         'https://forms.kumaraguruseds.space/',
+  SHORT_DOMAIN_BASE:'https://forms.kumaraguruseds.space/',
+  LINKS_SHEET_ID:   '1666kdh2J5Ep3R7J3GAWCWzSTDpOi6i1R6yj_wdN1EpI',
   GITHUB_USERNAME:  'kumaraguru-seds',
   GITHUB_REPO:      'forms',
   GITHUB_BRANCH:    'main',
@@ -35,7 +36,15 @@ function getFolder(parent, name) {
 }
 
 function rootFolder() {
-  return DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+  if (CONFIG.DRIVE_FOLDER_ID && CONFIG.DRIVE_FOLDER_ID !== 'YOUR_FOLDER_ID') {
+    try {
+      return DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
+    } catch (e) {
+      Logger.log('CONFIG.DRIVE_FOLDER_ID fallback: ' + e.toString());
+    }
+  }
+  var it = DriveApp.getRootFolder().getFoldersByName('SEDS_Forms');
+  return it.hasNext() ? it.next() : DriveApp.getRootFolder().createFolder('SEDS_Forms');
 }
 
 function sanitizeName(name) {
@@ -51,16 +60,27 @@ function sanitizeName(name) {
 // ============================================================
 function doGet(e) {
   try {
-    var action = (e.parameter.action || '').trim();
-    var formId = (e.parameter.formId || '').trim();
-    var token  = (e.parameter.adminToken || '').trim();
-    var slug   = (e.parameter.slug || '').trim();
+    e = e || {};
+    var param = e.parameter || {};
+    var action = (param.action || '').trim();
+    var formId = (param.formId || '').trim();
+    var token  = (param.adminToken || '').trim();
+    var slug   = (param.slug || '').trim();
+
+    if (!action) {
+      return jsonResp({ status: 'ok', message: 'SEDS Forms & Shortener API Active', ts: new Date().toISOString() });
+    }
+
     switch (action) {
       case 'getAllForms':  return jsonResp(listAllForms());
       case 'listForms':    return jsonResp(listAllForms());
       case 'getForm':      return jsonResp(getForm(formId));
       case 'getResponses': return jsonResp(getResponses(formId, token));
       case 'checkSlug':    return jsonResp(checkSlugAvailability(slug));
+      case 'lookupSlug':
+      case 'getLink':      return jsonResp(lookupSlug(slug));
+      case 'getAllLinks':  return jsonResp(getAllLinks());
+      case 'deleteForm':   return jsonResp(deleteForm(param));
       case 'ping':         return jsonResp({ status: 'ok', ts: new Date().toISOString() });
       default:             return jsonResp({ error: 'Unknown action: ' + action });
     }
@@ -72,18 +92,18 @@ function doGet(e) {
 function doPost(e) {
   try {
     var body = {};
-    if (e.postData && e.postData.contents) {
+    if (e && e.postData && e.postData.contents) {
       try {
         body = JSON.parse(e.postData.contents);
       } catch (ex) {
-        body = e.parameter || {};
+        body = (e && e.parameter) || {};
       }
     } else {
-      body = e.parameter || {};
+      body = (e && e.parameter) || {};
     }
 
-    var action = (body.action || (e.parameter ? e.parameter.action : '') || '').trim();
-    if (!action && (body.longUrl || (e.parameter && e.parameter.longUrl)) && (body.slug || (e.parameter && e.parameter.slug))) {
+    var action = (body.action || (e && e.parameter ? e.parameter.action : '') || '').trim();
+    if (!action && (body.longUrl || (e && e.parameter && e.parameter.longUrl)) && (body.slug || (e && e.parameter && e.parameter.slug))) {
       action = 'createShortUrl';
     }
 
@@ -91,14 +111,20 @@ function doPost(e) {
       case 'verifyAdmin':    return jsonResp(verifyAdmin(body));
       case 'getAllForms':    return jsonResp(listAllForms());
       case 'listForms':      return jsonResp(listAllForms());
+      case 'getForm':        return jsonResp(getForm(body.formId || (e && e.parameter ? e.parameter.formId : '')));
+      case 'getResponses':   return jsonResp(getResponses(body.formId || (e && e.parameter ? e.parameter.formId : ''), body.adminToken || (e && e.parameter ? e.parameter.adminToken : '')));
       case 'saveForm':       return jsonResp(saveForm(body.form));
       case 'submitResponse': return jsonResp(submitResponse(body));
       case 'uploadFile':     return jsonResp(uploadFile(body));
       case 'deleteForm':     return jsonResp(deleteForm(body));
       case 'notifyAdmins':   return jsonResp(notifyAdmins(body));
-      case 'checkSlug':      return jsonResp(checkSlugAvailability(body.slug || (e.parameter ? e.parameter.slug : '')));
+      case 'checkSlug':      return jsonResp(checkSlugAvailability(body.slug || (e && e.parameter ? e.parameter.slug : '')));
+      case 'lookupSlug':
+      case 'getLink':        return jsonResp(lookupSlug(body.slug || (e && e.parameter ? e.parameter.slug : '')));
+      case 'getAllLinks':    return jsonResp(getAllLinks());
       case 'createShortUrl':
       case 'shortenUrl':     return jsonResp(createShortUrl(body));
+      case 'ping':           return jsonResp({ status: 'ok', ts: new Date().toISOString() });
       default:               return jsonResp({ error: 'Unknown action: ' + action });
     }
   } catch (err) {
@@ -173,13 +199,22 @@ function saveForm(form) {
 }
 
 function deleteForm(body) {
-  var form = getForm(body.formId);
-  if (form.error)                          return form;
-  if (form.adminToken !== body.adminToken) return { error: 'Unauthorized' };
-  var folder = getFolder(rootFolder(), CONFIG.FORMS_FOLDER);
-  var it     = folder.getFilesByName(body.formId + '.json');
-  if (it.hasNext()) it.next().setTrashed(true);
-  return { success: true };
+  var formId = String(body.formId || '').trim();
+  if (!formId) return { success: false, error: 'formId is required' };
+  try {
+    var folder = getFolder(rootFolder(), CONFIG.FORMS_FOLDER);
+    var it = folder.getFilesByName(formId + '.json');
+    var deletedCount = 0;
+    while (it.hasNext()) {
+      var file = it.next();
+      file.setTrashed(true);
+      deletedCount++;
+    }
+    return { success: true, formId: formId, count: deletedCount, message: 'Form deleted from cloud' };
+  } catch (err) {
+    Logger.log('deleteForm error: ' + err.toString());
+    return { success: false, error: err.toString() };
+  }
 }
 
 // ============================================================
@@ -387,37 +422,46 @@ function getResponses(formId, adminToken) {
 //  FILE UPLOAD  →  Drive: FormResponses/<FormTitle>/Files/<Q>/<ResId>/
 // ============================================================
 function uploadFile(body) {
-  var formId        = body.formId;
-  var formTitle     = body.formTitle;
-  var questionTitle = body.questionTitle;
-  var fileName      = body.fileName || 'upload';
-  var fileData      = body.fileData;
-  var mimeType      = body.mimeType || 'application/octet-stream';
-  var responseId    = body.responseId;
+  try {
+    var formId        = body.formId;
+    var formTitle     = body.formTitle;
+    var questionTitle = body.questionTitle;
+    var fileName      = body.fileName || 'upload';
+    var fileData      = body.fileData;
+    var mimeType      = body.mimeType || 'application/octet-stream';
+    var responseId    = body.responseId;
 
-  if (!fileData) return { error: 'No file data provided' };
+    if (!fileData) return { success: false, error: 'No file data provided' };
 
-  var rf        = rootFolder();
-  var respRoot  = getFolder(rf, CONFIG.RESPONSES_FOLDER);
-  var formDir   = getFolder(respRoot, sanitizeName(formTitle || formId));
-  var filesDir  = getFolder(formDir, 'Files');
-  var qDir      = getFolder(filesDir, sanitizeName(questionTitle || 'Upload'));
-  var targetDir = responseId ? getFolder(qDir, responseId) : qDir;
+    var rf        = rootFolder();
+    var respRoot  = getFolder(rf, CONFIG.RESPONSES_FOLDER);
+    var formDir   = getFolder(respRoot, sanitizeName(formTitle || formId));
+    var filesDir  = getFolder(formDir, 'Files');
+    var qDir      = getFolder(filesDir, sanitizeName(questionTitle || 'Upload'));
+    var targetDir = responseId ? getFolder(qDir, responseId) : qDir;
 
-  var decoded = Utilities.base64Decode(fileData);
-  var blob    = Utilities.newBlob(decoded, mimeType, fileName);
-  var file    = targetDir.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    var decoded = Utilities.base64Decode(fileData);
+    var blob    = Utilities.newBlob(decoded, mimeType, fileName);
+    var file    = targetDir.createFile(blob);
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (shareErr) {
+      Logger.log('Sharing permissions notice: ' + shareErr.toString());
+    }
 
-  var viewUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
+    var viewUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
 
-  return {
-    success:  true,
-    fileId:   file.getId(),
-    fileUrl:  file.getUrl(),
-    viewUrl:  viewUrl,
-    fileName: fileName,
-  };
+    return {
+      success:  true,
+      fileId:   file.getId(),
+      fileUrl:  file.getUrl(),
+      viewUrl:  viewUrl,
+      fileName: fileName,
+    };
+  } catch (err) {
+    Logger.log('uploadFile error: ' + err.toString());
+    return { success: false, error: err.toString() };
+  }
 }
 
 // ============================================================
@@ -589,6 +633,15 @@ function escHtml(str) {
 //  URL SHORTENER & CUSTOM LINK BACKEND
 // ============================================================
 function getLinksSheet() {
+  if (CONFIG.LINKS_SHEET_ID) {
+    try {
+      var ssById = SpreadsheetApp.openById(CONFIG.LINKS_SHEET_ID);
+      var sById = ssById.getSheetByName('Links') || ssById.getSheets()[0];
+      if (sById) return sById;
+    } catch(e) {
+      Logger.log('CONFIG.LINKS_SHEET_ID open notice: ' + e.toString());
+    }
+  }
   var root = rootFolder();
   var files = root.getFilesByName('SEDS_ShortLinks');
   var ss;
@@ -606,6 +659,47 @@ function getLinksSheet() {
   var s = ss.getSheetByName('Links');
   if (!s) s = ss.getSheets()[0];
   return s;
+}
+
+function lookupSlug(slug) {
+  if (!slug) return { success: false, error: 'No slug provided' };
+  var cleanSlug = String(slug).trim().toLowerCase();
+  try {
+    var sheet = getLinksSheet();
+    var lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      var data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+      for (var i = 0; i < data.length; i++) {
+        var longUrl = String(data[i][0]).trim();
+        var s = String(data[i][1]).trim();
+        if (s.toLowerCase() === cleanSlug) {
+          return { success: true, slug: s, longUrl: longUrl, targetUrl: longUrl };
+        }
+      }
+    }
+    return { success: false, error: 'Slug not found' };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+function getAllLinks() {
+  try {
+    var sheet = getLinksSheet();
+    var lastRow = sheet.getLastRow();
+    var links = {};
+    if (lastRow > 1) {
+      var data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+      for (var i = 0; i < data.length; i++) {
+        var longUrl = String(data[i][0]).trim();
+        var s = String(data[i][1]).trim();
+        if (s && longUrl) links[s] = longUrl;
+      }
+    }
+    return { success: true, links: links };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
 }
 
 function checkSlugAvailability(slug) {

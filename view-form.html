@@ -561,9 +561,10 @@
 // =========================================================
 //  CONFIG
 // =========================================================
-const GAS_KEY   = 'seds_gas_url';
-const FORMS_KEY = 'seds_forms_v2';
-let GAS_URL     = localStorage.getItem(GAS_KEY) || '';
+const GAS_KEY         = 'seds_gas_url';
+const FORMS_KEY       = 'seds_forms_v2';
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
+let GAS_URL           = localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
 
 // =========================================================
 //  STATE
@@ -1789,16 +1790,46 @@ function clearForm(){
 //  GAS API
 // =========================================================
 async function gasPost(data){
-  if(!GAS_URL) throw new Error('GAS URL not configured');
-  const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(data),redirect:'follow'});
-  return r.json();
+  const targetUrl = GAS_URL || DEFAULT_GAS_URL;
+  if(!targetUrl) throw new Error('Google Apps Script URL not configured');
+  try {
+    const r = await fetch(targetUrl, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    const text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch (jsonErr) {
+      console.warn('gasPost returned non-JSON response:', text.substring(0, 120));
+      return { error: 'Non-JSON server response', raw: text };
+    }
+  } catch (err) {
+    console.warn('gasPost network error:', err);
+    return { error: err.toString() };
+  }
 }
+
 async function gasGet(params){
-  if(!GAS_URL) throw new Error('GAS URL not configured');
-  const url=new URL(GAS_URL);
-  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
-  const r=await fetch(url.toString(),{redirect:'follow'});
-  return r.json();
+  const targetUrl = GAS_URL || DEFAULT_GAS_URL;
+  if(!targetUrl) throw new Error('Google Apps Script URL not configured');
+  
+  // Strategy 1: Attempt standard GET request
+  try {
+    const url = new URL(targetUrl);
+    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+    const r = await fetch(url.toString(), { redirect: 'follow' });
+    const text = await r.text();
+    if (text && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
+      return JSON.parse(text);
+    }
+  } catch (e) {
+    // Fallback below
+  }
+
+  // Strategy 2: Reliable POST fallback
+  return gasPost(params);
 }
 
 init();

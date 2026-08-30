@@ -2758,9 +2758,6 @@
           <div class="shorturl-badge">
             <span class="material-icons-round" style="font-size:13px">stars</span> SEDS SHORT URL & CUSTOM SLUG
           </div>
-          <a href="shorturl/shorturl.html" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px">
-            Shortener Hub <span class="material-icons-round" style="font-size:13px">open_in_new</span>
-          </a>
         </div>
 
         <!-- Active Short Link View -->
@@ -2787,7 +2784,7 @@
         <div id="createShortLinkForm">
           <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:2px">Create a Custom Short Link:</div>
           <div class="slug-input-group">
-            <div class="slug-prefix">kumaraguruseds.space/</div>
+            <div class="slug-prefix">forms.kumaraguruseds.space/</div>
             <input type="text" id="shareSlugInput" class="slug-input-field" placeholder="custom-slug" pattern="^[a-zA-Z0-9_\-\/]+$" oninput="onShareSlugInput(this.value)">
             <button type="button" class="slug-action-btn" onclick="generateRandomSlug()" title="Generate clean slug">
               <span class="material-icons-round" style="font-size:15px">auto_awesome</span> Auto
@@ -3111,13 +3108,44 @@
     const FORMS_KEY = 'seds_forms_v2';
     const AUTH_KEY = 'seds_admin_auth';
     const BASE = window.location.origin + window.location.pathname.replace(/forms\.html.*/, '');
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
+    const DELETED_KEY = 'seds_deleted_forms';
 
-    let GAS_URL = localStorage.getItem(GAS_KEY) || '';
+    let GAS_URL = localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+
+    function getDeletedFormIds() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'));
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    function recordDeletedFormId(id) {
+      if (!id) return;
+      const set = getDeletedFormIds();
+      set.add(id);
+      localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(set)));
+    }
+
+    function unrecordDeletedFormId(id) {
+      if (!id) return;
+      const set = getDeletedFormIds();
+      set.delete(id);
+      localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(set)));
+    }
 
     // =========================================================
     //  STATE
     // =========================================================
-    let forms = JSON.parse(localStorage.getItem(FORMS_KEY) || '{}');
+    let rawForms = JSON.parse(localStorage.getItem(FORMS_KEY) || '{}');
+    const delSet = getDeletedFormIds();
+    let forms = {};
+    Object.keys(rawForms).forEach(k => {
+      if (!delSet.has(k)) forms[k] = rawForms[k];
+    });
+    localStorage.setItem(FORMS_KEY, JSON.stringify(forms));
+
     let curFormId = null;
     let curToken = null;
     let activeQId = null;
@@ -3238,13 +3266,30 @@
     }
 
     async function loadAllFormsFromCloud(showToast = false) {
-      if (!GAS_URL) return;
+      if (!GAS_URL && !DEFAULT_GAS_URL) return;
+      const deletedSet = getDeletedFormIds();
+
+      // Clean local memory of any deleted form
+      let purged = false;
+      Object.keys(forms).forEach(id => {
+        if (deletedSet.has(id)) {
+          delete forms[id];
+          purged = true;
+        }
+      });
+      if (purged) saveLocal();
+
       try {
         const res = await gasGet({ action: 'getAllForms' });
         if (res && res.success && Array.isArray(res.forms)) {
           let count = 0;
           res.forms.forEach(f => {
             if (f && f.id) {
+              // If deleted by admin, do NOT restore, and purge from Drive if still exists
+              if (deletedSet.has(f.id)) {
+                gasPost({ action: 'deleteForm', formId: f.id, adminToken: f.adminToken }).catch(() => {});
+                return;
+              }
               if (!forms[f.id] || (f.updatedAt && f.updatedAt >= (forms[f.id].updatedAt || 0))) {
                 forms[f.id] = f;
                 count++;
@@ -3253,7 +3298,7 @@
           });
           saveLocal();
           renderDashboard();
-          if (showToast) toast(`Synced ${res.forms.length} forms from cloud! ✅`, 'success');
+          if (showToast && count > 0) toast(`Synced ${count} form${count !== 1 ? 's' : ''} from cloud! ✅`, 'success');
         }
       } catch (err) {
         console.warn('Could not fetch cloud forms:', err);
@@ -3296,8 +3341,128 @@
       }, dur);
     }
 
+    // =========================================================
+    //  INDEXEDDB & RESILIENT STORAGE ENGINE
+    // =========================================================
+    const IDB_NAME = 'SEDS_FORMS_DB';
+    const IDB_STORE = 'forms_store';
+    let idbInstance = null;
+
+    function initIDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) { resolve(null); return; }
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = e => {
+          idbInstance = e.target.result;
+          resolve(idbInstance);
+        };
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function idbSaveForms(formsData) {
+      if (!idbInstance) await initIDB();
+      if (!idbInstance) return;
+      try {
+        const tx = idbInstance.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+        store.put(formsData, 'all_forms');
+      } catch (e) {
+        console.warn('IndexedDB save notice:', e);
+      }
+    }
+
+    async function idbLoadForms() {
+      if (!idbInstance) await initIDB();
+      if (!idbInstance) return null;
+      return new Promise((resolve) => {
+        try {
+          const tx = idbInstance.transaction(IDB_STORE, 'readonly');
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.get('all_forms');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+
+    function compressImageFile(file, maxWidth = 1200, quality = 0.82) {
+      return new Promise((resolve) => {
+        if (!file) { resolve(''); return; }
+        if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
+          const r = new FileReader();
+          r.onload = e => resolve(e.target.result);
+          r.onerror = () => resolve('');
+          r.readAsDataURL(file);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth || h > maxWidth) {
+              if (w > h) {
+                h = Math.round((h * maxWidth) / w);
+                w = maxWidth;
+              } else {
+                w = Math.round((w * maxWidth) / h);
+                h = maxWidth;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl);
+          };
+          img.onerror = () => resolve(ev.target.result);
+          img.src = ev.target.result;
+        };
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(file);
+      });
+    }
+
     function saveLocal() {
-      localStorage.setItem(FORMS_KEY, JSON.stringify(forms));
+      // 1. Asynchronously persist full unlimited data in IndexedDB
+      idbSaveForms(forms);
+
+      // 2. Safely attempt localStorage write
+      try {
+        localStorage.setItem(FORMS_KEY, JSON.stringify(forms));
+      } catch (err) {
+        console.warn('LocalStorage quota limit reached. Pruning base64 previews for localStorage safely...');
+        try {
+          const compact = {};
+          Object.keys(forms).forEach(k => {
+            const f = forms[k];
+            compact[k] = {
+              ...f,
+              questions: (f.questions || []).map(q => {
+                if (q.imageData && q.imageData.startsWith('data:') && q.imageData.length > 30000) {
+                  return { ...q, imageData: '' };
+                }
+                return q;
+              })
+            };
+          });
+          localStorage.setItem(FORMS_KEY, JSON.stringify(compact));
+        } catch (fallbackErr) {
+          console.warn('LocalStorage completely full. IndexedDB and Cloud Drive maintain all data.');
+        }
+      }
     }
 
     const curForm = () => forms[curFormId];
@@ -3328,8 +3493,20 @@
     // =========================================================
     //  INIT
     // =========================================================
-    function init() {
+    async function init() {
       initStars();
+      await initIDB();
+      const idbForms = await idbLoadForms();
+      if (idbForms && typeof idbForms === 'object') {
+        const delSet = getDeletedFormIds();
+        Object.keys(idbForms).forEach(k => {
+          if (!delSet.has(k)) {
+            if (!forms[k] || ((idbForms[k].updatedAt || 0) > (forms[k].updatedAt || 0))) {
+              forms[k] = idbForms[k];
+            }
+          }
+        });
+      }
       checkAdminAuth();
       const p = new URLSearchParams(location.search);
       const id = p.get('id'), tk = p.get('token');
@@ -3407,6 +3584,7 @@
     // =========================================================
     function createNewForm() {
       const id = 'SEDS' + uid(10);
+      unrecordDeletedFormId(id);
       const tok = token(36);
       // Always-required email question (locked, cannot be deleted/reordered from position 0)
       const emailQ = {
@@ -3656,17 +3834,11 @@
       toast('Header image updated', 'success');
     }
 
-    function handleHeaderImageUpload(file) {
+    async function handleHeaderImageUpload(file) {
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        toast('Image too large (max 5MB)', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = e => {
-        applyPresetBanner(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      toast('Processing header image...', 'info');
+      const dataUrl = await compressImageFile(file, 1600, 0.85);
+      if (dataUrl) applyPresetBanner(dataUrl);
     }
 
     function removeHeaderImage() {
@@ -3717,19 +3889,16 @@
     function addOrChangeTitleImage() {
       const inp = document.createElement('input');
       inp.type = 'file'; inp.accept = 'image/*';
-      inp.onchange = e => {
+      inp.onchange = async e => {
         const file = e.target.files[0]; if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { toast('Image too large (max 5MB)', 'error'); return; }
-        const r = new FileReader();
-        r.onload = ev => {
-          const f = curForm(); if (!f) return;
-          f.titleImage = ev.target.result;
-          f.updatedAt = Date.now();
-          saveLocal();
-          renderTitleCardToolbar();
-          toast('Title image updated! ✅', 'success');
-        };
-        r.readAsDataURL(file);
+        toast('Compressing image...', 'info');
+        const dataUrl = await compressImageFile(file, 1200, 0.82);
+        const f = curForm(); if (!f) return;
+        f.titleImage = dataUrl;
+        f.updatedAt = Date.now();
+        saveLocal();
+        renderTitleCardToolbar();
+        toast('Title image updated! ✅', 'success');
       };
       inp.click();
     }
@@ -3816,17 +3985,15 @@
     function addImageBlock() {
       const inp = document.createElement('input');
       inp.type = 'file'; inp.accept = 'image/*';
-      inp.onchange = e => {
+      inp.onchange = async e => {
         const file = e.target.files[0]; if (!file) return;
-        const r = new FileReader();
-        r.onload = ev => {
-          const f = curForm(); if (!f) return;
-          const block = { id: 'IMG' + uid(8), type: 'image', imageData: ev.target.result, imageAlt: file.name };
-          if (activeQId) { const idx = f.questions.findIndex(q => q.id === activeQId); f.questions.splice(idx + 1, 0, block); }
-          else f.questions.push(block);
-          saveAndRender();
-        };
-        r.readAsDataURL(file);
+        toast('Optimizing image...', 'info');
+        const dataUrl = await compressImageFile(file, 1200, 0.82);
+        const f = curForm(); if (!f) return;
+        const block = { id: 'IMG' + uid(8), type: 'image', imageData: dataUrl, imageAlt: file.name };
+        if (activeQId) { const idx = f.questions.findIndex(q => q.id === activeQId); f.questions.splice(idx + 1, 0, block); }
+        else f.questions.push(block);
+        saveAndRender();
       };
       inp.click();
     }
@@ -3913,17 +4080,14 @@
     }
     function addQImage(qId) {
       const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-      inp.onchange = e => {
+      inp.onchange = async e => {
         const file = e.target.files[0]; if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { toast('Image too large (max 5MB)', 'error'); return; }
-        const r = new FileReader();
-        r.onload = ev => {
-          updQ(qId, 'imageData', ev.target.result);
-          updQ(qId, 'imageAlt', file.name);
-          saveAndRender(); setActiveQ(qId);
-          toast('Question image added! ✅', 'success');
-        };
-        r.readAsDataURL(file);
+        toast('Optimizing question image...', 'info');
+        const dataUrl = await compressImageFile(file, 1200, 0.82);
+        updQ(qId, 'imageData', dataUrl);
+        updQ(qId, 'imageAlt', file.name);
+        saveAndRender(); setActiveQ(qId);
+        toast('Question image added! ✅', 'success');
       };
       inp.click();
     }
@@ -3943,21 +4107,18 @@
 
     function changeImageBlock(qId) {
       const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-      inp.onchange = e => {
+      inp.onchange = async e => {
         const file = e.target.files[0]; if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { toast('Image too large (max 5MB)', 'error'); return; }
-        const r = new FileReader();
-        r.onload = ev => {
-          const f = curForm(); if (!f) return;
-          const q = f.questions.find(q => q.id === qId);
-          if (q) {
-            q.imageData = ev.target.result;
-            q.imageAlt = file.name;
-            saveAndRender();
-            toast('Image updated! ✅', 'success');
-          }
-        };
-        r.readAsDataURL(file);
+        toast('Optimizing image...', 'info');
+        const dataUrl = await compressImageFile(file, 1200, 0.82);
+        const f = curForm(); if (!f) return;
+        const q = f.questions.find(q => q.id === qId);
+        if (q) {
+          q.imageData = dataUrl;
+          q.imageAlt = file.name;
+          saveAndRender();
+          toast('Image updated! ✅', 'success');
+        }
       };
       inp.click();
     }
@@ -4496,8 +4657,10 @@
     // =========================================================
     //  SHORT URL & CUSTOM LINK MANAGER
     // =========================================================
-    const SHORTENER_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
-    const CUSTOM_DOMAIN_BASE = 'https://kumaraguruseds.space/';
+    // =========================================================
+    //  SHORT URL & CUSTOM LINK MANAGER
+    // =========================================================
+    const CUSTOM_DOMAIN_BASE = 'https://forms.kumaraguruseds.space/';
     let shareSlugTimeout = null;
     let isShareSlugAvailable = false;
     let deployCountdownInterval = null;
@@ -4593,20 +4756,15 @@
 
       shareSlugTimeout = setTimeout(async () => {
         try {
-          const res = await fetch(`${SHORTENER_APPS_SCRIPT}?action=checkSlug&slug=${encodeURIComponent(slug)}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.available) {
-              if (msg) msg.innerHTML = `<span class="material-icons-round" style="font-size:14px;color:var(--success)">check_circle</span><span style="color:var(--success)">Available! ✅ kumaraguruseds.space/${slug}</span>`;
-              isShareSlugAvailable = true;
-              if (btn) btn.disabled = false;
-            } else {
-              if (msg) msg.innerHTML = `<span class="material-icons-round" style="font-size:14px;color:var(--danger)">cancel</span><span style="color:var(--danger)">Already taken! ❌ Try another slug</span>`;
-              isShareSlugAvailable = false;
-              if (btn) btn.disabled = true;
-            }
+          const res = await gasGet({ action: 'checkSlug', slug });
+          if (res && res.available) {
+            if (msg) msg.innerHTML = `<span class="material-icons-round" style="font-size:14px;color:var(--success)">check_circle</span><span style="color:var(--success)">Available! ✅ forms.kumaraguruseds.space/${slug}</span>`;
+            isShareSlugAvailable = true;
+            if (btn) btn.disabled = false;
           } else {
-            throw new Error('Check returned status ' + res.status);
+            if (msg) msg.innerHTML = `<span class="material-icons-round" style="font-size:14px;color:var(--danger)">cancel</span><span style="color:var(--danger)">Already taken! ❌ Try another slug</span>`;
+            isShareSlugAvailable = false;
+            if (btn) btn.disabled = true;
           }
         } catch (err) {
           // If offline or network error, permit submission attempt
@@ -4645,18 +4803,14 @@
       const finalShortUrl = CUSTOM_DOMAIN_BASE + slug;
 
       try {
-        const formData = new URLSearchParams();
-        formData.append('longUrl', longUrl);
-        formData.append('slug', slug);
-        if (email) formData.append('email', email);
-
-        const fetchPromise = fetch(SHORTENER_APPS_SCRIPT, {
-          method: 'POST',
-          mode: 'cors',
-          body: formData
+        const fetchPromise = gasPost({
+          action: 'createShortUrl',
+          longUrl: longUrl,
+          slug: slug,
+          email: email
         });
 
-        // If local GAS connected, also save custom slug to form
+        // Save custom slug to form
         f.shortUrl = finalShortUrl;
         f.customSlug = slug;
         f.updatedAt = Date.now();
@@ -4900,16 +5054,46 @@
     //  GAS API
     // =========================================================
     async function gasPost(data) {
-      if (!GAS_URL) throw new Error('GAS URL not set');
-      const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data), redirect: 'follow' });
-      return r.json();
+      const targetUrl = GAS_URL || DEFAULT_GAS_URL;
+      if (!targetUrl) throw new Error('GAS URL not set');
+      try {
+        const r = await fetch(targetUrl, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+        const text = await r.text();
+        try {
+          return JSON.parse(text);
+        } catch (jsonErr) {
+          console.warn('gasPost returned non-JSON response:', text.substring(0, 120));
+          return { error: 'Non-JSON server response', raw: text };
+        }
+      } catch (err) {
+        console.warn('gasPost network error:', err);
+        return { error: err.toString() };
+      }
     }
+
     async function gasGet(params) {
-      if (!GAS_URL) throw new Error('GAS URL not set');
-      const url = new URL(GAS_URL);
-      Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-      const r = await fetch(url.toString(), { redirect: 'follow' });
-      return r.json();
+      const targetUrl = GAS_URL || DEFAULT_GAS_URL;
+      if (!targetUrl) throw new Error('GAS URL not set');
+      
+      // Strategy 1: Attempt standard GET request
+      try {
+        const url = new URL(targetUrl);
+        Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+        const r = await fetch(url.toString(), { redirect: 'follow' });
+        const text = await r.text();
+        if (text && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
+          return JSON.parse(text);
+        }
+      } catch (e) {
+        // Fallback below
+      }
+
+      // Strategy 2: Reliable POST fallback (bypasses Google GET redirect 302/404 issues)
+      return gasPost(params);
     }
 
     // =========================================================
@@ -4929,18 +5113,45 @@
       loadEditor(newId, newTok);
     }
 
-    function deleteCurrentForm() {
+    async function deleteCurrentForm() {
       const f = curForm(); if (!f) return;
-      if (!confirm(`Delete "${f.title}"? This cannot be undone.`)) return;
-      if (GAS_URL) gasPost({ action: 'deleteForm', formId: f.id, adminToken: f.adminToken }).catch(() => { });
-      delete forms[curFormId]; saveLocal();
-      goToDashboard(); toast('Form deleted', 'info');
+      if (!confirm(`Delete "${f.title || 'Untitled form'}"? This cannot be undone.`)) return;
+      const formId = f.id;
+      const tok = f.adminToken;
+      recordDeletedFormId(formId);
+      delete forms[formId];
+      saveLocal();
+      goToDashboard();
+      toast('Deleting form from cloud...', 'info');
+
+      try {
+        const res = await gasPost({ action: 'deleteForm', formId: formId, adminToken: tok });
+        if (res && res.success) {
+          toast('Form permanently deleted ✅', 'success');
+        }
+      } catch (e) {
+        console.warn('Cloud delete notice:', e);
+      }
     }
 
-    function confirmDeleteDash(id) {
+    async function confirmDeleteDash(id) {
       const f = forms[id]; if (!f) return;
-      if (!confirm(`Delete "${f.title}"?`)) return;
-      delete forms[id]; saveLocal(); renderDashboard(); toast('Form deleted', 'info');
+      if (!confirm(`Delete "${f.title || 'Untitled form'}"? This cannot be undone.`)) return;
+      const tok = f.adminToken;
+      recordDeletedFormId(id);
+      delete forms[id];
+      saveLocal();
+      renderDashboard();
+      toast('Deleting form from cloud...', 'info');
+
+      try {
+        const res = await gasPost({ action: 'deleteForm', formId: id, adminToken: tok });
+        if (res && res.success) {
+          toast('Form permanently deleted ✅', 'success');
+        }
+      } catch (e) {
+        console.warn('Cloud delete notice:', e);
+      }
     }
 
     function exportFormJSON() {

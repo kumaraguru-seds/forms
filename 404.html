@@ -210,6 +210,7 @@
       font-weight: 800;
       background: linear-gradient(135deg, #ef4444, #ff8a80);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
       letter-spacing: 2px;
@@ -304,7 +305,6 @@
       const sources = [
         'links.json',
         './links.json',
-        'shorturl/links.json',
         'https://raw.githubusercontent.com/kumaraguru-seds/forms/main/links.json'
       ];
 
@@ -349,15 +349,15 @@
       // 3. Fallback: Check Apps Script for latest dynamic links
       const SHORTENER_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
       try {
-        const gasRes = await fetch(`${SHORTENER_APPS_SCRIPT}?action=checkSlug&slug=${encodeURIComponent(slug)}`);
+        const gasRes = await fetch(`${SHORTENER_APPS_SCRIPT}?action=lookupSlug&slug=${encodeURIComponent(slug)}`);
         if (gasRes.ok) {
           const gasData = await gasRes.json();
-          // If slug is taken, it exists in the system
-          if (gasData && gasData.available === false && gasData.longUrl) {
+          if (gasData && gasData.success && (gasData.longUrl || gasData.targetUrl)) {
+            const dest = gasData.longUrl || gasData.targetUrl;
             title.textContent = '🚀 Launching Destination...';
-            desc.textContent = `Redirecting to destination...`;
+            desc.textContent = `Redirecting to: ${dest}`;
             setTimeout(() => {
-              window.location.replace(gasData.longUrl);
+              window.location.replace(dest);
             }, 350);
             return;
           }
@@ -379,8 +379,8 @@
           <a href="index.html" class="btn btn-primary">
             <span class="material-icons-round">home</span> SEDS Forms Home
           </a>
-          <a href="shorturl/shorturl.html" class="btn btn-ghost">
-            <span class="material-icons-round">link</span> Create a Short Link
+          <a href="forms.html" class="btn btn-ghost">
+            <span class="material-icons-round">edit_note</span> Admin Portal
           </a>
         </div>
       `;

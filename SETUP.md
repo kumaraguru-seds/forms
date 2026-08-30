@@ -130,24 +130,24 @@ The same URL stays the same — no need to reconnect.
 
 ## 6 — Short URLs & Custom Link Slugs
 
-Every form created can now have a custom short link on your domain (e.g. `https://kumaraguruseds.space/my-event` or `https://kumaraguruseds.space/feedback`).
+Every form created can now have a custom short link on your subdomain (e.g. `https://forms.kumaraguruseds.space/my-event` or `https://forms.kumaraguruseds.space/feedback`).
 
 ### How to Create a Short Link:
 1. Open the form in `forms.html` and click **Publish / Share** (or Get Links).
 2. Under the **🌟 SEDS Short URL & Custom Slug** section:
    - Enter your desired slug (e.g. `workshop-2026`).
    - Or click **🎲 Auto** to automatically generate a clean, brandable slug.
-   - The system checks slug availability in real time.
+   - The system checks slug availability in real time directly with `Code.gs`.
 3. Click **🚀 Generate Link**.
-4. The custom short URL is created, saved to your form definition, and deployed to Google Sheets & GitHub!
+4. The custom short URL (`https://forms.kumaraguruseds.space/<slug>`) is created, saved to your form definition, and deployed to Google Sheets & GitHub!
 5. Use the 1-click **📋 Copy** button to share your short URL anywhere.
 
 ### How 404 Redirects Work:
-When someone visits `https://kumaraguruseds.space/<slug>`:
+When someone visits `https://forms.kumaraguruseds.space/<slug>`:
 - GitHub Pages serves `404.html`.
-- `404.html` reads `links.json` from the repository.
+- `404.html` reads `links.json` from the repository (and queries `Code.gs` dynamic lookup).
 - If the slug matches, it instantly and smoothly redirects the visitor to the full form destination URL.
-- Direct form IDs (like `https://kumaraguruseds.space/SEDSxxx`) automatically route to `view-form.html?id=SEDSxxx`.
+- Direct form IDs (like `https://forms.kumaraguruseds.space/SEDSxxx`) automatically route to `view-form.html?id=SEDSxxx`.
 
 ---
 
