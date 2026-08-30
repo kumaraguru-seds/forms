@@ -761,6 +761,14 @@ async function loadForm(formId){
     if (msgEl) msgEl.textContent = loadingSteps[stepIdx];
   }, 900);
 
+  // Hard timeout — show error if GAS doesn't respond in 12 seconds
+  let timedOut = false;
+  const loadTimeout = setTimeout(() => {
+    timedOut = true;
+    clearInterval(msgTimer);
+    showError('Connection timed out. The server may be slow — please try refreshing the page.');
+  }, 12000);
+
   // Guarantee smooth minimum animation duration
   const minDelay = new Promise(resolve => setTimeout(resolve, 600));
 
@@ -776,11 +784,16 @@ async function loadForm(formId){
     try{
       const d=await gasGet({action:'getForm',formId});
       if(d&&!d.error) form=d;
-    } catch(e){}
+    } catch(e){
+      console.warn('loadForm GAS error:', e);
+    }
   }
 
   await minDelay;
+  clearTimeout(loadTimeout);
   clearInterval(msgTimer);
+
+  if(timedOut) return; // timeout already showed error
 
   if(!form){ showError('This form does not exist or has been removed.'); return; }
 

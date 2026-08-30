@@ -2721,11 +2721,11 @@
       .ft-input { font-size: 22px; }
 
       /* Responses */
-      .resp-sub-tabs { flex-wrap: wrap; }
-      .resp-sub-tab { padding: 8px 14px; font-size: 12px; }
+      .resp-subtabs-bar { overflow-x: auto; flex-wrap: nowrap; }
+      .resp-subtab { padding: 8px 14px; font-size: 12px; white-space: nowrap; }
       .resp-main-card { padding: 16px 12px; }
       .resp-header-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .resp-count-label { font-size: 20px; }
+      .resp-count-title { font-size: 20px; }
       .resp-actions-group { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
       .resp-sheets-btn { width: auto; }
       #respMoreMenu { right: auto; left: 0; }
@@ -2786,19 +2786,20 @@
       .section-nav-pill { font-size: 11px; padding: 3px 8px; }
 
       /* Responses */
-      .resp-sub-tabs { overflow-x: auto; flex-wrap: nowrap; }
-      .resp-sub-tab { white-space: nowrap; padding: 8px 12px; font-size: 11px; }
+      .resp-subtabs-bar { overflow-x: auto; flex-wrap: nowrap; }
+      .resp-subtab { white-space: nowrap; padding: 8px 12px; font-size: 11px; }
       .resp-main-card { padding: 12px 10px; border-radius: 12px; }
-      .resp-count-label { font-size: 18px; }
-      .resp-actions-group { gap: 4px; }
+      .resp-count-title { font-size: 18px; }
+      .resp-count { font-size: 24px; }
+      .resp-actions-group { gap: 4px; flex-wrap: wrap; }
       .resp-sheets-btn { font-size: 12px; padding: 7px 10px; }
       .resp-card { padding: 14px 12px; }
+      .resp-card-title { font-size: 13px; }
+      .resp-indiv-preview-wrap { padding: 10px 4px; }
+      .resp-stepper-group { flex-wrap: wrap; gap: 6px; }
+      .resp-step-btn { padding: 7px 10px; font-size: 12px; }
+      .resp-step-indicator { font-size: 12px; }
       .chart-bar-label { font-size: 11px; }
-
-      /* Pagination */
-      .resp-pager { gap: 6px; }
-      .pager-btn { width: 30px; height: 30px; }
-      .pager-info { font-size: 12px; }
 
       /* Settings */
       .settings-wrap { padding: 10px 8px; }
@@ -2823,7 +2824,9 @@
       .dash-hero h1 { font-size: 16px; }
       .ft-input { font-size: 16px; }
       .tab-btn { padding: 8px 10px; font-size: 10px; }
-      .resp-count-label { font-size: 16px; }
+      .resp-count-title { font-size: 16px; }
+      .resp-count { font-size: 20px; }
+      .resp-subtab { padding: 6px 10px; font-size: 10px; }
       .btn-primary { padding: 6px 10px; font-size: 11px; }
     }
   </style>
@@ -4108,8 +4111,11 @@
     // =========================================================
     //  FORM URLS
     // =========================================================
-    const getRespUrl = id => `${BASE}view-form.html?id=${id}`;
+    const getRespUrl  = id => `${BASE}view-form.html?id=${id}`;
     const getAdminUrl = (id, tk) => `${BASE}index.html?id=${id}&token=${encodeURIComponent(tk)}`;
+    // Share proxy URL: routes through Apps Script so WhatsApp/social crawlers
+    // get proper OG thumbnail (form header image) + then redirect to view-form.html
+    const getShareProxyUrl = id => GAS_URL ? `${GAS_URL}?action=share&formId=${encodeURIComponent(id)}` : getRespUrl(id);
 
     // =========================================================
     //  CREATE / OPEN FORM
@@ -5199,7 +5205,9 @@
 
     function showShareDialog() {
       const f = curForm(); if (!f) return;
-      document.getElementById('respLinkInput').value = getRespUrl(f.id);
+      // Use GAS share proxy URL for the respondent link so WhatsApp/social crawlers
+      // see the correct form OG thumbnail (form header image)
+      document.getElementById('respLinkInput').value = getShareProxyUrl(f.id);
       document.getElementById('adminLinkInput').value = getAdminUrl(f.id, f.adminToken);
       document.getElementById('shareStatusMsg').innerHTML = f.published
         ? `<span style="color:var(--success)">✅ Form is published and accepting responses.</span>`
@@ -5317,7 +5325,9 @@
 
       const slug = (slugInput?.value || '').trim();
       const email = (emailInput?.value || '').trim();
-      const longUrl = getRespUrl(f.id);
+      // Use the GAS share proxy URL as the link destination — this way WhatsApp
+      // crawls the proxy and gets proper form OG thumbnail before redirecting
+      const longUrl = getShareProxyUrl(f.id);
 
       if (!slug || slug.length < 3 || !/^[a-zA-Z0-9_\-\/]+$/.test(slug)) {
         toast('Please enter a valid slug (min 3 characters, a-z, 0-9, -)', 'error');

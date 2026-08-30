@@ -82,6 +82,8 @@ function doGet(e) {
       case 'getAllLinks':  return jsonResp(getAllLinks());
       case 'deleteForm':   return jsonResp(deleteForm(param));
       case 'ping':         return jsonResp({ status: 'ok', ts: new Date().toISOString() });
+      case 'share':        return serveFormSharePage(formId, param.slug);
+      case 'formMeta':     return jsonResp(getFormMeta(formId));
       default:             return jsonResp({ error: 'Unknown action: ' + action });
     }
   } catch (err) {
@@ -129,6 +131,99 @@ function doPost(e) {
     }
   } catch (err) {
     return jsonResp({ error: err.toString() });
+  }
+}
+
+// ============================================================
+//  FORM SHARE PROXY — Returns HTML with OG meta tags + redirect
+//  Social crawlers (WhatsApp, Telegram, Twitter, etc.) read this
+// ============================================================
+function serveFormSharePage(formId, slug) {
+  var title = 'SEDS Form — Kumaraguru SEDS';
+  var desc  = 'Fill out this form from Kumaraguru SEDS.';
+  var img   = 'https://forms.kumaraguruseds.space/sedsb.png';
+  var destUrl = CONFIG.BASE_URL + 'view-form.html?id=' + encodeURIComponent(formId || '');
+
+  try {
+    if (formId) {
+      var form = getForm(formId);
+      if (form && !form.error) {
+        if (form.title && form.title !== 'Untitled form') {
+          title = form.title + ' — Kumaraguru SEDS';
+        }
+        if (form.description) desc = form.description;
+        // Prefer headerImage → titleImage → bannerImage → default
+        var imgSrc = form.headerImage || form.titleImage || form.bannerImage || '';
+        if (imgSrc && imgSrc.length > 10) {
+          // If it's a base64 data URI, we can't use it in OG (must be public URL)
+          // Try to use Google Drive public URL if it was stored as a Drive URL
+          if (imgSrc.startsWith('http')) {
+            img = imgSrc;
+          } else if (imgSrc.startsWith('data:')) {
+            // Keep default sedsb.png — data URIs are not valid og:image
+            img = 'https://forms.kumaraguruseds.space/sedsb.png';
+          }
+        }
+      }
+    }
+    if (slug) {
+      try {
+        var linkData = lookupSlug(slug);
+        if (linkData && linkData.longUrl) destUrl = linkData.longUrl;
+      } catch (e) {}
+    }
+  } catch (e) {
+    Logger.log('serveFormSharePage error: ' + e.toString());
+  }
+
+  var safeTitle = title.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  var safeDesc  = desc.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  var html = '<!DOCTYPE html><html lang="en"><head>' +
+    '<meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + safeTitle + '</title>' +
+    '<meta name="description" content="' + safeDesc + '">' +
+    '<!-- Open Graph -->' +
+    '<meta property="og:type" content="website">' +
+    '<meta property="og:title" content="' + safeTitle + '">' +
+    '<meta property="og:description" content="' + safeDesc + '">' +
+    '<meta property="og:image" content="' + img + '">' +
+    '<meta property="og:image:width" content="1200">' +
+    '<meta property="og:image:height" content="630">' +
+    '<meta property="og:url" content="' + destUrl + '">' +
+    '<meta property="og:site_name" content="Kumaraguru SEDS">' +
+    '<!-- Twitter Card -->' +
+    '<meta name="twitter:card" content="summary_large_image">' +
+    '<meta name="twitter:title" content="' + safeTitle + '">' +
+    '<meta name="twitter:description" content="' + safeDesc + '">' +
+    '<meta name="twitter:image" content="' + img + '">' +
+    '<meta http-equiv="refresh" content="0; url=' + destUrl + '">' +
+    '<link rel="canonical" href="' + destUrl + '">' +
+    '</head><body>' +
+    '<p style="font-family:sans-serif;text-align:center;padding:40px;color:#8da4c4">Redirecting to ' + safeTitle + '...</p>' +
+    '<script>window.location.replace(' + JSON.stringify(destUrl) + ');</script>' +
+    '</body></html>';
+
+  return HtmlService.createHtmlOutput(html)
+    .setTitle(title)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function getFormMeta(formId) {
+  if (!formId) return { error: 'formId required' };
+  try {
+    var form = getForm(formId);
+    if (!form || form.error) return { error: 'Form not found' };
+    return {
+      success: true,
+      title: form.title || 'SEDS Form',
+      description: form.description || '',
+      headerImage: form.headerImage || form.titleImage || form.bannerImage || '',
+      formId: formId
+    };
+  } catch (e) {
+    return { error: e.toString() };
   }
 }
 
