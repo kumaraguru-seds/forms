@@ -1928,59 +1928,327 @@
       color: rgba(77, 166, 255, .3)
     }
 
-    /* Resp chart */
+    /* ===========================
+       RESPONSES SECTION (Google Forms Style)
+       =========================== */
+    .resp-main-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 26px 0 26px;
+      box-shadow: var(--shadow);
+    }
+    .resp-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .resp-count-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .resp-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .g-sheets-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 157, 88, 0.14);
+      border: 1px solid rgba(15, 157, 88, 0.45);
+      color: #34d399;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .g-sheets-btn:hover {
+      background: rgba(15, 157, 88, 0.25);
+      border-color: #34d399;
+      transform: translateY(-1px);
+    }
+    .resp-icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .resp-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent);
+    }
+    .resp-subtabs-bar {
+      display: flex;
+      gap: 28px;
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .resp-subtab {
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      color: var(--muted);
+      padding: 14px 4px 12px 4px;
+      cursor: pointer;
+      transition: all .2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+    }
+    .resp-subtab:hover {
+      color: var(--text);
+    }
+    .resp-subtab.active {
+      color: var(--accent);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
+    }
+    .no-resp-card {
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 50px 20px;
+      text-align: center;
+      margin-top: 18px;
+    }
+    .resp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-top: 16px;
+    }
+    .resp-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .resp-card-subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .resp-emails-container {
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .resp-email-row {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background .15s;
+    }
+    .resp-email-row:hover {
+      background: rgba(255, 255, 255, 0.07);
+    }
+    .resp-nav-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .resp-nav-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      max-width: 480px;
+      cursor: pointer;
+    }
+    .resp-nav-select option {
+      background: #0b1528;
+      color: #fff;
+    }
+    .resp-stepper-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .resp-step-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .resp-step-btn:hover:not(:disabled) {
+      background: rgba(77, 166, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .resp-step-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .resp-step-indicator {
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 50px;
+      text-align: center;
+    }
+    .resp-nav-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    .resp-option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+    }
+    .resp-option-item:last-child {
+      border-bottom: none;
+    }
+    .resp-count-pill {
+      background: rgba(77, 166, 255, 0.12);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(77, 166, 255, 0.25);
+    }
+    .indiv-q-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-top: 14px;
+    }
+    .indiv-q-card.selected-ans {
+      border-left: 4px solid var(--accent);
+    }
+    .indiv-q-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .indiv-choice-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .indiv-choice-row.chosen {
+      background: rgba(77, 166, 255, 0.1);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .indiv-choice-row.chosen .material-icons-round {
+      color: var(--accent);
+    }
+    .indiv-text-box {
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    /* Resp chart & summary items */
     .resp-chart-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      margin-top: 14px;
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-top: 16px;
     }
-
     .resp-chart-title {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
       margin-bottom: 14px;
-      color: var(--text)
+      color: var(--text);
     }
-
     .chart-bar-row {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 8px;
-      font-size: 12px
+      font-size: 12px;
     }
-
     .chart-bar-label {
-      width: 120px;
+      width: 130px;
       color: var(--muted);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      flex-shrink: 0
+      flex-shrink: 0;
     }
-
     .chart-bar-track {
       flex: 1;
       height: 20px;
       background: rgba(255, 255, 255, .06);
-      border-radius: 4px;
-      overflow: hidden
+      border-radius: 6px;
+      overflow: hidden;
     }
-
     .chart-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 4px;
-      transition: width .5s ease
+      background: linear-gradient(90deg, var(--accent), #60a5fa);
+      border-radius: 6px;
+      transition: width .5s ease;
     }
-
     .chart-bar-count {
-      width: 30px;
+      width: 35px;
       text-align: right;
       color: var(--muted);
-      flex-shrink: 0
+      flex-shrink: 0;
+      font-weight: 600;
     }
 
     @media(max-width:768px) {
@@ -2561,28 +2829,119 @@
 
     <!-- Responses Tab -->
     <div id="responsesTab" class="hidden">
-      <div class="editor-layout" style="max-width:860px">
+      <div class="editor-layout" style="max-width:860px;margin:0 auto">
         <div class="resp-wrap" style="width:100%">
-          <div class="resp-header">
-            <div>
-              <div class="resp-count" id="respCountDisplay">0</div>
-              <div class="resp-label">responses</div>
+          
+          <!-- Top Responses Master Header Card (matching Google Forms) -->
+          <div class="resp-main-card">
+            <div class="resp-top-bar">
+              <div class="resp-count-title">
+                <span id="respCountDisplay">0</span> responses
+              </div>
+              <div class="resp-actions-group">
+                <a id="sheetsLinkBtn" href="#" target="_blank" class="g-sheets-btn" style="display:none" title="Open responses spreadsheet in Google Sheets">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="#0F9D58"/>
+                    <path d="M9.5 17H7.5v-2h2v2zm0-3.5H7.5v-2h2v2zm0-3.5H7.5V8h2v2zm7 7h-5.5v-2h5.5v2zm0-3.5h-5.5v-2h5.5v2zm0-3.5h-5.5V8h5.5v2z" fill="#fff"/>
+                  </svg>
+                  <span>View in Sheets</span>
+                </a>
+                <button type="button" class="resp-icon-btn" onclick="toggleRespMenu(event)" title="More options" id="respMenuBtn">
+                  <span class="material-icons-round">more_vert</span>
+                </button>
+                <div id="respMoreMenu" class="menu-popup hidden" style="position:absolute;right:0;top:calc(100% + 8px);min-width:220px;z-index:100;box-shadow:0 12px 32px rgba(0,0,0,0.6)">
+                  <div class="menu-item" onclick="exportResponsesCSV()">
+                    <span class="material-icons-round">download</span> Download responses (.csv)
+                  </div>
+                  <div class="menu-item" onclick="printAllResponses()">
+                    <span class="material-icons-round">print</span> Print all responses
+                  </div>
+                  <div class="menu-item" onclick="loadResponses()">
+                    <span class="material-icons-round">refresh</span> Reload responses
+                  </div>
+                  <div class="menu-item danger" onclick="confirmDeleteAllResponses()">
+                    <span class="material-icons-round">delete_forever</span> Delete all responses
+                  </div>
+                </div>
+              </div>
             </div>
-            <a id="sheetsLinkBtn" href="#" target="_blank" class="sheets-btn" style="display:none">
-              <span class="material-icons-round">table_chart</span>
-              Open Sheets
-            </a>
-            <button class="icon-btn" onclick="loadResponses()" title="Refresh">
-              <span class="material-icons-round">refresh</span>
-            </button>
-          </div>
-          <div id="respContent">
-            <div class="no-resp">
-              <span class="material-icons-round">inbox</span>
-              <p>No responses yet.<br>Publish your form to start collecting.</p>
+
+            <!-- Sub-Tabs: Summary | Question | Individual -->
+            <div class="resp-subtabs-bar">
+              <button type="button" class="resp-subtab active" id="subtabSummary" onclick="switchRespSubtab('summary')">Summary</button>
+              <button type="button" class="resp-subtab" id="subtabQuestion" onclick="switchRespSubtab('question')">Question</button>
+              <button type="button" class="resp-subtab" id="subtabIndividual" onclick="switchRespSubtab('individual')">Individual</button>
             </div>
           </div>
-          <div id="respCharts"></div>
+
+          <!-- Empty State (when 0 responses) -->
+          <div id="respEmptyState" class="no-resp-card hidden">
+            <span class="material-icons-round" style="font-size:54px;color:var(--muted)">inbox</span>
+            <div style="font-size:18px;font-weight:600;margin-top:10px;color:var(--text)">Waiting for responses</div>
+            <p style="color:var(--muted);font-size:13px;margin-top:4px">Publish and share your form to begin collecting responses.</p>
+          </div>
+
+          <!-- SUB-TAB 1: SUMMARY VIEW -->
+          <div id="respViewSummary" class="resp-subview">
+            <!-- Respondent Emails Card -->
+            <div class="resp-card" id="respEmailsCard">
+              <div class="resp-card-title">Who has responded?</div>
+              <div class="resp-card-subtitle">Email</div>
+              <div id="respEmailsList" class="resp-emails-container"></div>
+            </div>
+            <!-- Dynamic Question Charts/Summaries -->
+            <div id="respSummaryQuestionsList"></div>
+          </div>
+
+          <!-- SUB-TAB 2: QUESTION VIEW -->
+          <div id="respViewQuestion" class="resp-subview hidden">
+            <!-- Question Stepper Nav -->
+            <div class="resp-nav-card">
+              <div class="resp-nav-select-wrap">
+                <select id="respQSelect" class="resp-nav-select" onchange="onRespQSelectChange(this.value)"></select>
+              </div>
+              <div class="resp-stepper-group">
+                <button type="button" class="resp-step-btn" onclick="stepRespQ(-1)" id="btnPrevQ" title="Previous Question">
+                  <span class="material-icons-round">chevron_left</span>
+                </button>
+                <span class="resp-step-indicator" id="respQIndicator">1 of 1</span>
+                <button type="button" class="resp-step-btn" onclick="stepRespQ(1)" id="btnNextQ" title="Next Question">
+                  <span class="material-icons-round">chevron_right</span>
+                </button>
+              </div>
+            </div>
+            <!-- Active Question Response Detail Card -->
+            <div id="respQuestionDetailArea"></div>
+          </div>
+
+          <!-- SUB-TAB 3: INDIVIDUAL VIEW -->
+          <div id="respViewIndividual" class="resp-subview hidden">
+            <!-- Individual Stepper Nav -->
+            <div class="resp-nav-card">
+              <div class="resp-nav-select-wrap">
+                <select id="respIndivSelect" class="resp-nav-select" onchange="onRespIndivSelectChange(this.value)"></select>
+              </div>
+              <div class="resp-stepper-group">
+                <button type="button" class="resp-step-btn" onclick="stepRespIndiv(-1)" id="btnPrevIndiv" title="Previous Respondent">
+                  <span class="material-icons-round">chevron_left</span>
+                </button>
+                <span class="resp-step-indicator" id="respIndivIndicator">1 of 1</span>
+                <button type="button" class="resp-step-btn" onclick="stepRespIndiv(1)" id="btnNextIndiv" title="Next Respondent">
+                  <span class="material-icons-round">chevron_right</span>
+                </button>
+                <div class="resp-nav-divider"></div>
+                <button type="button" class="resp-step-btn" onclick="printCurrentIndividualResponse()" title="Print this response">
+                  <span class="material-icons-round">print</span>
+                </button>
+                <button type="button" class="resp-step-btn" onclick="deleteCurrentIndividualResponse()" title="Delete this response">
+                  <span class="material-icons-round">delete_outline</span>
+                </button>
+              </div>
+            </div>
+            <!-- Full Form Submission Preview -->
+            <div id="respIndividualFormPreview" class="resp-indiv-preview-wrap"></div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -4888,74 +5247,576 @@
     }
 
     // =========================================================
-    //  RESPONSES
+    //  RESPONSES (Google Forms Architecture: Summary | Question | Individual)
     // =========================================================
+    let currentResponsesData = [];
+    let activeRespSubtab = 'summary';
+    let activeRespQIndex = 0;
+    let activeRespIndivIndex = 0;
+
+    function switchRespSubtab(subtab) {
+      activeRespSubtab = subtab;
+      document.getElementById('subtabSummary')?.classList.toggle('active', subtab === 'summary');
+      document.getElementById('subtabQuestion')?.classList.toggle('active', subtab === 'question');
+      document.getElementById('subtabIndividual')?.classList.toggle('active', subtab === 'individual');
+
+      document.getElementById('respViewSummary')?.classList.toggle('hidden', subtab !== 'summary');
+      document.getElementById('respViewQuestion')?.classList.toggle('hidden', subtab !== 'question');
+      document.getElementById('respViewIndividual')?.classList.toggle('hidden', subtab !== 'individual');
+
+      renderActiveRespSubtab();
+    }
+
     async function loadResponses() {
       const f = curForm(); if (!f) return;
-      if (!GAS_URL) { toast('Connect Apps Script to load responses', 'warning'); return; }
-      toast('Loading responses...', 'info');
+      const emptyState = document.getElementById('respEmptyState');
+      const sumView = document.getElementById('respViewSummary');
+      const qView = document.getElementById('respViewQuestion');
+      const indView = document.getElementById('respViewIndividual');
+
+      if (!GAS_URL && !DEFAULT_GAS_URL) {
+        toast('Connect Apps Script to load responses', 'warning');
+        return;
+      }
+
+      toast('Syncing responses...', 'info');
       try {
         const d = await gasGet({ action: 'getResponses', formId: f.id, adminToken: f.adminToken });
-        if (!d || d.error) { toast('Error: ' + (d?.error || 'Unknown'), 'error'); return; }
-        f.responseCount = d.count || 0; f.sheetUrl = d.sheetUrl; saveLocal();
-        document.getElementById('respCountDisplay').textContent = d.count || 0;
-        document.getElementById('respCountBadge').textContent = d.count || 0;
-        document.getElementById('respCountBadge').classList.toggle('hidden', (d.count || 0) === 0);
-        const sheetsBtn = document.getElementById('sheetsLinkBtn');
-        if (d.sheetUrl) { sheetsBtn.href = d.sheetUrl; sheetsBtn.style.display = 'flex'; }
-        if (!d.responses || d.responses.length === 0) {
-          document.getElementById('respContent').innerHTML = `<div class="no-resp">
-        <span class="material-icons-round">inbox</span>
-        <p>No responses yet. ${f.published ? 'Share your form to collect responses.' : 'Publish your form first.'}</p>
-      </div>`;
-          document.getElementById('respCharts').innerHTML = '';
-        } else {
-          renderRespTable(d.responses);
-          renderRespCharts(d.responses, f.questions || []);
+        if (!d || d.error) {
+          toast('Error loading responses: ' + (d?.error || 'Unknown'), 'error');
+          return;
         }
-        toast(`${d.count} response${d.count !== 1 ? 's' : ''} loaded`, 'success');
-      } catch (e) { toast('Failed to load: ' + e.message, 'error'); }
+
+        currentResponsesData = Array.isArray(d.responses) ? d.responses : [];
+        f.responseCount = currentResponsesData.length;
+        if (d.sheetUrl) f.sheetUrl = d.sheetUrl;
+        saveLocal();
+
+        // Update counts
+        const countDisp = document.getElementById('respCountDisplay');
+        const countBadge = document.getElementById('respCountBadge');
+        if (countDisp) countDisp.textContent = currentResponsesData.length;
+        if (countBadge) {
+          countBadge.textContent = currentResponsesData.length;
+          countBadge.classList.toggle('hidden', currentResponsesData.length === 0);
+        }
+
+        // View in Sheets button
+        const sheetsBtn = document.getElementById('sheetsLinkBtn');
+        if (sheetsBtn) {
+          if (d.sheetUrl) {
+            sheetsBtn.href = d.sheetUrl;
+            sheetsBtn.style.display = 'inline-flex';
+          } else {
+            sheetsBtn.style.display = 'none';
+          }
+        }
+
+        if (currentResponsesData.length === 0) {
+          if (emptyState) emptyState.classList.remove('hidden');
+          if (sumView) sumView.classList.add('hidden');
+          if (qView) qView.classList.add('hidden');
+          if (indView) indView.classList.add('hidden');
+        } else {
+          if (emptyState) emptyState.classList.add('hidden');
+          switchRespSubtab(activeRespSubtab || 'summary');
+        }
+
+        toast(`${currentResponsesData.length} response${currentResponsesData.length !== 1 ? 's' : ''} loaded! ✅`, 'success');
+      } catch (err) {
+        console.warn('loadResponses error:', err);
+        toast('Could not fetch responses from cloud', 'error');
+      }
     }
 
-    function renderRespTable(responses) {
-      if (!responses || !responses.length) return;
-      const hdrs = Object.keys(responses[0]);
-      document.getElementById('respContent').innerHTML = `
-    <div class="resp-table-wrap">
-      <table class="resp-table">
-        <thead><tr>${hdrs.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
-        <tbody>
-          ${responses.map(row => `<tr>${hdrs.map(h => `<td title="${esc(String(row[h] || ''))}">${esc(String(row[h] || ''))}</td>`).join('')}</tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
+    function renderActiveRespSubtab() {
+      if (currentResponsesData.length === 0) return;
+      if (activeRespSubtab === 'summary') {
+        renderSummarySubtab();
+      } else if (activeRespSubtab === 'question') {
+        renderQuestionSubtab();
+      } else if (activeRespSubtab === 'individual') {
+        renderIndividualSubtab();
+      }
     }
 
-    function renderRespCharts(responses, questions) {
-      const chartDiv = document.getElementById('respCharts');
-      let html = '';
-      questions.filter(q => ['multiple_choice', 'checkboxes', 'dropdown'].includes(q.type)).forEach(q => {
-        const counts = {};
-        responses.forEach(r => {
-          const ans = String(r[q.title] || '');
-          ans.split(',').map(a => a.trim()).filter(Boolean).forEach(a => { counts[a] = (counts[a] || 0) + 1; });
-        });
-        const total = responses.length || 1;
-        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-        if (!entries.length) return;
-        html += `<div class="resp-chart-card">
-      <div class="resp-chart-title">${esc(q.title || 'Untitled')}</div>
-      ${entries.map(([label, cnt]) => `
-        <div class="chart-bar-row">
-          <div class="chart-bar-label" title="${esc(label)}">${esc(label)}</div>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill" style="width:${Math.round(cnt / total * 100)}%"></div>
-          </div>
-          <div class="chart-bar-count">${cnt}</div>
-        </div>`).join('')}
-    </div>`;
+    // --- 1. SUMMARY SUBTAB ---
+    function renderSummarySubtab() {
+      const f = curForm(); if (!f) return;
+      const emailsList = document.getElementById('respEmailsList');
+      const sumQsList = document.getElementById('respSummaryQuestionsList');
+      if (!emailsList || !sumQsList) return;
+
+      // Extract respondent emails
+      const emails = [];
+      currentResponsesData.forEach(r => {
+        const em = r['Email'] || r['Email address'] || r['email'] || r['Respondent Email'];
+        if (em && typeof em === 'string' && em.trim()) {
+          emails.push(em.trim());
+        }
       });
-      chartDiv.innerHTML = html;
+
+      if (emails.length > 0) {
+        document.getElementById('respEmailsCard')?.classList.remove('hidden');
+        emailsList.innerHTML = emails.map(em => `
+          <div class="resp-email-row">
+            <span>${esc(em)}</span>
+            <button type="button" class="copy-btn" onclick="copyText('${esc(em)}','Email')" style="padding:4px 8px;font-size:11px;background:rgba(255,255,255,0.08)">
+              <span class="material-icons-round" style="font-size:13px">content_copy</span>
+            </button>
+          </div>
+        `).join('');
+      } else {
+        document.getElementById('respEmailsCard')?.classList.add('hidden');
+      }
+
+      // Render breakdown cards for all questions
+      const validQs = (f.questions || []).filter(q => !['section', 'section_title', 'image'].includes(q.type));
+      let qHtml = '';
+
+      validQs.forEach(q => {
+        const qTitle = q.title || ('Question ' + q.id);
+        const total = currentResponsesData.length;
+
+        if (['multiple_choice', 'checkboxes', 'dropdown'].includes(q.type)) {
+          // Choice breakdown with counts and bars
+          const counts = {};
+          (q.options || []).forEach(opt => counts[opt] = 0);
+          counts['Other'] = 0;
+
+          currentResponsesData.forEach(r => {
+            const rawAns = String(r[qTitle] || '');
+            if (rawAns) {
+              const answers = q.type === 'checkboxes' ? rawAns.split(',').map(s => s.trim()) : [rawAns.trim()];
+              answers.forEach(a => {
+                if (counts.hasOwnProperty(a)) counts[a] = (counts[a] || 0) + 1;
+                else if (a) counts['Other'] = (counts['Other'] || 0) + 1;
+              });
+            }
+          });
+
+          if (!counts['Other']) delete counts['Other'];
+          const entries = Object.entries(counts);
+
+          qHtml += `
+            <div class="resp-card">
+              <div class="resp-card-title">${esc(qTitle)}</div>
+              <div class="resp-card-subtitle">${total} response${total !== 1 ? 's' : ''}</div>
+              <div style="margin-top:14px">
+                ${entries.map(([label, cnt]) => {
+                  const pct = total > 0 ? Math.round((cnt / total) * 100) : 0;
+                  return `
+                    <div class="chart-bar-row">
+                      <div class="chart-bar-label" title="${esc(label)}">${esc(label)}</div>
+                      <div class="chart-bar-track">
+                        <div class="chart-bar-fill" style="width:${pct}%"></div>
+                      </div>
+                      <div class="chart-bar-count">${cnt} (${pct}%)</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        } else if (['linear_scale', 'rating'].includes(q.type)) {
+          // Scale / Rating score breakdown
+          const scores = [];
+          const counts = {};
+          const maxScale = q.scaleMax || q.ratingMax || 5;
+          for (let i = (q.scaleMin || 1); i <= maxScale; i++) counts[i] = 0;
+
+          currentResponsesData.forEach(r => {
+            const val = parseFloat(r[qTitle]);
+            if (!isNaN(val)) {
+              scores.push(val);
+              counts[val] = (counts[val] || 0) + 1;
+            }
+          });
+
+          const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 'N/A';
+
+          qHtml += `
+            <div class="resp-card">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div class="resp-card-title">${esc(qTitle)}</div>
+                  <div class="resp-card-subtitle">${scores.length} response${scores.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);padding:6px 14px;border-radius:10px;text-align:center">
+                  <div style="font-size:11px;color:#ffd700;font-weight:600">AVERAGE</div>
+                  <div style="font-size:18px;font-weight:700;color:#fff">${avg} / ${maxScale}</div>
+                </div>
+              </div>
+              <div style="margin-top:14px">
+                ${Object.entries(counts).map(([score, cnt]) => {
+                  const pct = scores.length > 0 ? Math.round((cnt / scores.length) * 100) : 0;
+                  return `
+                    <div class="chart-bar-row">
+                      <div class="chart-bar-label">${q.type === 'rating' ? '⭐ ' : ''}${score}</div>
+                      <div class="chart-bar-track">
+                        <div class="chart-bar-fill" style="width:${pct}%"></div>
+                      </div>
+                      <div class="chart-bar-count">${cnt}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        } else if (q.type === 'file_upload') {
+          // File list with links
+          const files = [];
+          currentResponsesData.forEach(r => {
+            const raw = String(r[qTitle] || '').trim();
+            if (raw) {
+              raw.split(',').forEach(item => {
+                const link = item.trim();
+                if (link) files.push(link);
+              });
+            }
+          });
+
+          qHtml += `
+            <div class="resp-card">
+              <div class="resp-card-title">${esc(qTitle)}</div>
+              <div class="resp-card-subtitle">${files.length} uploaded file${files.length !== 1 ? 's' : ''}</div>
+              <div class="resp-emails-container" style="margin-top:10px">
+                ${files.length ? files.map(fileUrl => `
+                  <div class="resp-email-row">
+                    <span style="display:inline-flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis">
+                      <span class="material-icons-round" style="color:var(--accent);font-size:18px">attachment</span>
+                      <a href="${esc(fileUrl)}" target="_blank" style="color:var(--accent);text-decoration:none">${esc(fileUrl)}</a>
+                    </span>
+                    <a href="${esc(fileUrl)}" target="_blank" class="copy-btn" style="padding:4px 10px;font-size:11px;background:rgba(77,166,255,0.15);color:var(--accent);text-decoration:none">
+                      <span class="material-icons-round" style="font-size:13px">open_in_new</span>
+                    </a>
+                  </div>
+                `).join('') : '<div style="color:var(--muted);font-size:13px">No files uploaded yet.</div>'}
+              </div>
+            </div>
+          `;
+        } else {
+          // Text responses list (short answer / paragraph / date / time)
+          const texts = [];
+          currentResponsesData.forEach(r => {
+            const ans = String(r[qTitle] || '').trim();
+            if (ans) texts.push(ans);
+          });
+
+          qHtml += `
+            <div class="resp-card">
+              <div class="resp-card-title">${esc(qTitle)}</div>
+              <div class="resp-card-subtitle">${texts.length} response${texts.length !== 1 ? 's' : ''}</div>
+              <div class="resp-emails-container" style="margin-top:10px">
+                ${texts.length ? texts.map(txt => `
+                  <div class="resp-email-row">
+                    <span style="line-height:1.4">${esc(txt)}</span>
+                  </div>
+                `).join('') : '<div style="color:var(--muted);font-size:13px">No responses for this question yet.</div>'}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      sumQsList.innerHTML = qHtml;
+    }
+
+    // --- 2. QUESTION SUBTAB (Matching Screenshot 2) ---
+    function renderQuestionSubtab() {
+      const f = curForm(); if (!f) return;
+      const validQs = (f.questions || []).filter(q => !['section', 'section_title', 'image'].includes(q.type));
+      if (!validQs.length) return;
+
+      if (activeRespQIndex >= validQs.length) activeRespQIndex = 0;
+      if (activeRespQIndex < 0) activeRespQIndex = 0;
+
+      const curQ = validQs[activeRespQIndex];
+      const qSelect = document.getElementById('respQSelect');
+      const qIndicator = document.getElementById('respQIndicator');
+      const btnPrev = document.getElementById('btnPrevQ');
+      const btnNext = document.getElementById('btnNextQ');
+      const detailArea = document.getElementById('respQuestionDetailArea');
+
+      // Populate select
+      if (qSelect) {
+        qSelect.innerHTML = validQs.map((q, idx) => `
+          <option value="${idx}" ${idx === activeRespQIndex ? 'selected' : ''}>
+            ${idx + 1}. ${esc(q.title || ('Question ' + q.id))}
+          </option>
+        `).join('');
+      }
+
+      if (qIndicator) qIndicator.textContent = `${activeRespQIndex + 1} of ${validQs.length}`;
+      if (btnPrev) btnPrev.disabled = activeRespQIndex === 0;
+      if (btnNext) btnNext.disabled = activeRespQIndex === validQs.length - 1;
+
+      // Render Question Detail Card
+      const qTitle = curQ.title || ('Question ' + curQ.id);
+      let detailHtml = `
+        <div class="resp-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px">
+            <h3 style="font-size:17px;font-weight:600;color:var(--text)">${esc(qTitle)}</h3>
+            <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--muted);font-size:11px">
+              ${curQ.type.replace(/_/g, ' ').toUpperCase()}
+            </span>
+          </div>
+      `;
+
+      if (['multiple_choice', 'checkboxes', 'dropdown'].includes(curQ.type)) {
+        // Render every option with count pills (matching Screenshot 2)
+        const counts = {};
+        (curQ.options || []).forEach(opt => counts[opt] = 0);
+        counts['Other'] = 0;
+
+        currentResponsesData.forEach(r => {
+          const rawAns = String(r[qTitle] || '').trim();
+          if (rawAns) {
+            const answers = curQ.type === 'checkboxes' ? rawAns.split(',').map(s => s.trim()) : [rawAns];
+            answers.forEach(a => {
+              if (counts.hasOwnProperty(a)) counts[a] = (counts[a] || 0) + 1;
+              else if (a) counts['Other'] = (counts['Other'] || 0) + 1;
+            });
+          }
+        });
+
+        if (!counts['Other']) delete counts['Other'];
+
+        detailHtml += `
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${Object.entries(counts).map(([opt, cnt]) => `
+              <div class="resp-option-item">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span class="material-icons-round" style="color:var(--muted);font-size:20px">
+                    ${curQ.type === 'checkboxes' ? 'check_box_outline_blank' : 'radio_button_unchecked'}
+                  </span>
+                  <span>${esc(opt)}</span>
+                </div>
+                <div class="resp-count-pill">${cnt} response${cnt !== 1 ? 's' : ''}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        // List of all individual answers given for this question
+        const answers = [];
+        currentResponsesData.forEach((r, idx) => {
+          const ans = String(r[qTitle] || '').trim();
+          const email = r['Email'] || r['Email address'] || `Respondent #${idx + 1}`;
+          if (ans) answers.push({ ans, email });
+        });
+
+        detailHtml += `
+          <div class="resp-emails-container">
+            ${answers.length ? answers.map(item => `
+              <div class="resp-email-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+                <div style="font-size:11px;color:var(--accent);font-weight:500">${esc(item.email)}</div>
+                <div style="font-size:14px;color:var(--text)">${esc(item.ans)}</div>
+              </div>
+            `).join('') : '<div style="color:var(--muted);font-size:13px">No responses for this question.</div>'}
+          </div>
+        `;
+      }
+
+      detailHtml += `</div>`;
+      if (detailArea) detailArea.innerHTML = detailHtml;
+    }
+
+    function stepRespQ(delta) {
+      const f = curForm(); if (!f) return;
+      const validQs = (f.questions || []).filter(q => !['section', 'section_title', 'image'].includes(q.type));
+      const nextIdx = activeRespQIndex + delta;
+      if (nextIdx >= 0 && nextIdx < validQs.length) {
+        activeRespQIndex = nextIdx;
+        renderQuestionSubtab();
+      }
+    }
+
+    function onRespQSelectChange(val) {
+      activeRespQIndex = parseInt(val, 10) || 0;
+      renderQuestionSubtab();
+    }
+
+    // --- 3. INDIVIDUAL SUBTAB (Matching Screenshot 3) ---
+    function renderIndividualSubtab() {
+      const f = curForm(); if (!f) return;
+      if (!currentResponsesData.length) return;
+
+      if (activeRespIndivIndex >= currentResponsesData.length) activeRespIndivIndex = 0;
+      if (activeRespIndivIndex < 0) activeRespIndivIndex = 0;
+
+      const resp = currentResponsesData[activeRespIndivIndex];
+      const indivSelect = document.getElementById('respIndivSelect');
+      const indivIndicator = document.getElementById('respIndivIndicator');
+      const btnPrev = document.getElementById('btnPrevIndiv');
+      const btnNext = document.getElementById('btnNextIndiv');
+      const previewWrap = document.getElementById('respIndividualFormPreview');
+
+      // Populate select
+      if (indivSelect) {
+        indivSelect.innerHTML = currentResponsesData.map((r, idx) => {
+          const em = r['Email'] || r['Email address'] || `Response #${idx + 1}`;
+          const ts = r['Timestamp'] ? ` (${r['Timestamp']})` : '';
+          return `<option value="${idx}" ${idx === activeRespIndivIndex ? 'selected' : ''}>${esc(em + ts)}</option>`;
+        }).join('');
+      }
+
+      if (indivIndicator) indivIndicator.textContent = `${activeRespIndivIndex + 1} of ${currentResponsesData.length}`;
+      if (btnPrev) btnPrev.disabled = activeRespIndivIndex === 0;
+      if (btnNext) btnNext.disabled = activeRespIndivIndex === currentResponsesData.length - 1;
+
+      const respondentEmail = resp['Email'] || resp['Email address'] || resp['email'] || 'No email provided';
+
+      // Build Form Title Card (identical to Screenshot 3)
+      let formHtml = `
+        <div class="form-title-card" style="border-top:5px solid var(--accent);border-radius:16px;margin-top:14px;background:var(--card)">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span class="material-icons-round" style="font-size:15px;color:var(--warning)">lock</span> Responses cannot be edited
+          </div>
+          <h1 style="font-size:24px;font-weight:700;margin-bottom:8px;color:var(--text)">${esc(f.title || 'Untitled form')}</h1>
+          <p style="color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:16px">${esc(f.description || '')}</p>
+          
+          <div style="background:rgba(77,166,255,0.06);border:1px solid rgba(77,166,255,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--text)">
+            The respondent's email (<strong style="color:var(--accent)">${esc(respondentEmail)}</strong>) was recorded on submission of this form.
+          </div>
+          <div style="font-size:12px;color:var(--danger)">* Indicates required question</div>
+        </div>
+      `;
+
+      // Render each question with filled answer
+      (f.questions || []).forEach(q => {
+        if (q.type === 'section') {
+          formHtml += `
+            <div class="resp-card" style="background:linear-gradient(135deg,#132238,#0d192d);border-left:4px solid var(--accent)">
+              <div style="font-size:18px;font-weight:700">${esc(q.title || 'Section')}</div>
+              ${q.description ? `<p style="font-size:13px;color:var(--muted);margin-top:4px">${esc(q.description)}</p>` : ''}
+            </div>
+          `;
+          return;
+        }
+
+        const qTitle = q.title || ('Question ' + q.id);
+        const ansValue = resp[qTitle] || '';
+        const isAnswered = !!ansValue;
+
+        formHtml += `
+          <div class="indiv-q-card ${isAnswered ? 'selected-ans' : ''}">
+            <div class="indiv-q-title">
+              ${esc(qTitle)} ${q.required ? '<span style="color:var(--danger)">*</span>' : ''}
+            </div>
+        `;
+
+        if (['multiple_choice', 'dropdown'].includes(q.type)) {
+          // Radio buttons with selected state
+          formHtml += `<div style="display:flex;flex-direction:column;gap:6px">`;
+          (q.options || []).forEach(opt => {
+            const isChosen = String(ansValue).trim() === opt.trim();
+            formHtml += `
+              <div class="indiv-choice-row ${isChosen ? 'chosen' : ''}">
+                <span class="material-icons-round" style="font-size:20px">
+                  ${isChosen ? 'radio_button_checked' : 'radio_button_unchecked'}
+                </span>
+                <span>${esc(opt)}</span>
+              </div>
+            `;
+          });
+          formHtml += `</div>`;
+        } else if (q.type === 'checkboxes') {
+          // Checkbox list with checked states
+          const chosenList = String(ansValue).split(',').map(s => s.trim());
+          formHtml += `<div style="display:flex;flex-direction:column;gap:6px">`;
+          (q.options || []).forEach(opt => {
+            const isChosen = chosenList.includes(opt.trim());
+            formHtml += `
+              <div class="indiv-choice-row ${isChosen ? 'chosen' : ''}">
+                <span class="material-icons-round" style="font-size:20px">
+                  ${isChosen ? 'check_box' : 'check_box_outline_blank'}
+                </span>
+                <span>${esc(opt)}</span>
+              </div>
+            `;
+          });
+          formHtml += `</div>`;
+        } else if (q.type === 'file_upload') {
+          // File upload link
+          formHtml += `
+            <div class="indiv-text-box" style="display:flex;align-items:center;gap:8px">
+              <span class="material-icons-round" style="color:var(--accent)">attachment</span>
+              ${ansValue ? `<a href="${esc(ansValue)}" target="_blank" style="color:var(--accent);font-weight:500;text-decoration:none">${esc(ansValue)}</a>` : '<span style="color:var(--muted)">No file uploaded</span>'}
+            </div>
+          `;
+        } else {
+          // Text, rating, date, time, etc.
+          formHtml += `
+            <div class="indiv-text-box">
+              ${ansValue ? esc(ansValue) : '<span style="color:var(--muted)">No response</span>'}
+            </div>
+          `;
+        }
+
+        formHtml += `</div>`;
+      });
+
+      if (previewWrap) previewWrap.innerHTML = formHtml;
+    }
+
+    function stepRespIndiv(delta) {
+      const nextIdx = activeRespIndivIndex + delta;
+      if (nextIdx >= 0 && nextIdx < currentResponsesData.length) {
+        activeRespIndivIndex = nextIdx;
+        renderIndividualSubtab();
+      }
+    }
+
+    function onRespIndivSelectChange(val) {
+      activeRespIndivIndex = parseInt(val, 10) || 0;
+      renderIndividualSubtab();
+    }
+
+    function printCurrentIndividualResponse() {
+      window.print();
+    }
+
+    function printAllResponses() {
+      window.print();
+    }
+
+    function exportResponsesCSV() {
+      if (!currentResponsesData || !currentResponsesData.length) {
+        toast('No responses to export', 'warning');
+        return;
+      }
+      const f = curForm();
+      const headers = Object.keys(currentResponsesData[0]);
+      let csv = headers.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n';
+
+      currentResponsesData.forEach(row => {
+        csv += headers.map(h => `"${String(row[h] || '').replace(/"/g, '""')}"`).join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${(f?.title || 'form')}-responses.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast('Responses exported to CSV ✅', 'success');
+    }
+
+    function toggleRespMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('respMoreMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function confirmDeleteAllResponses() {
+      const f = curForm(); if (!f) return;
+      if (!confirm(`Are you sure you want to delete all responses for "${f.title}"? This cannot be undone.`)) return;
+      currentResponsesData = [];
+      f.responseCount = 0;
+      saveLocal();
+      loadResponses();
+      toast('All responses cleared', 'info');
     }
 
     // =========================================================
@@ -5241,7 +6102,7 @@
     function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
 
     // =========================================================
-    //  KEYBOARD
+    //  GLOBAL EVENT LISTENERS
     // =========================================================
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -5249,7 +6110,16 @@
         syncCloud();
         toast('Saved to cloud ✅', 'success');
       }
-      if (e.key === 'Escape') closeAllDDs();
+      if (e.key === 'Escape') {
+        closeAllDDs();
+        document.getElementById('respMoreMenu')?.classList.add('hidden');
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.resp-actions-group')) {
+        document.getElementById('respMoreMenu')?.classList.add('hidden');
+      }
     });
 
     // =========================================================
