@@ -71,7 +71,7 @@
       position: fixed;
       inset: 0;
       background: url('background.jpg') no-repeat center center/cover fixed;
-      filter: brightness(40%);
+      filter: brightness(70%);
       z-index: -2;
     }
 
@@ -112,8 +112,6 @@
     .redirect-card {
       background: var(--card);
       border: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border-radius: 24px;
       padding: 40px 32px;
       max-width: 520px;
@@ -238,6 +236,39 @@
       margin-bottom: 6px;
       letter-spacing: 2px;
     }
+
+    /* =============================================
+       RESPONSIVE BREAKPOINTS — 404.html
+       ============================================= */
+    @media (max-width: 768px) {
+      .redirect-card { padding: 36px 24px; border-radius: 20px; margin: 16px; }
+      .logo-img { height: 56px; }
+      h1 { font-size: 20px; }
+      .error-code { font-size: 48px; }
+      .status-icon { font-size: 44px; }
+      .btn-group { flex-direction: column; gap: 10px; width: 100%; }
+      .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+      .slug-badge { font-size: 11px; padding: 5px 14px; }
+    }
+
+    @media (max-width: 600px) {
+      .redirect-card { padding: 28px 16px; border-radius: 16px; margin: 10px; }
+      .logo-img { height: 46px; }
+      h1 { font-size: 18px; }
+      .subtitle { font-size: 13px; }
+      .error-code { font-size: 40px; letter-spacing: 1px; }
+      .spinner-box { width: 56px; height: 56px; }
+      .spinner-box::before { width: 40px; height: 40px; }
+      .btn-primary, .btn-ghost { font-size: 13px; padding: 10px 16px; border-radius: 10px; }
+      .slug-badge { font-size: 10px; }
+    }
+
+    @media (max-width: 400px) {
+      .redirect-card { padding: 22px 12px; }
+      h1 { font-size: 16px; }
+      .error-code { font-size: 34px; }
+      .logo-img { height: 38px; }
+    }
   </style>
 </head>
 
@@ -251,10 +282,10 @@
     <div id="slugDisplay" class="slug-badge" style="display:none"></div>
     <p class="desc" id="pageDesc">Please wait while we connect you to your destination...</p>
     <div class="btn-wrap" id="actionButtons" style="display:none">
-      <a href="index.html" class="btn btn-primary">
+      <a href="https://kumaraguruseds.space/" class="btn btn-primary">
         <span class="material-icons-round">home</span> Go to SEDS Home
       </a>
-      <a href="index.html" class="btn btn-ghost">
+      <a href="https://kumaraguruseds.space/" class="btn btn-ghost">
         <span class="material-icons-round">assignment</span> Admin Forms Portal
       </a>
     </div>
@@ -399,10 +430,10 @@
         <h1 class="title">Link Not Found</h1>
         <p class="desc">${msg}</p>
         <div class="btn-wrap">
-          <a href="index.html" class="btn btn-primary">
+          <a href="https://kumaraguruseds.space/" class="btn btn-primary">
             <span class="material-icons-round">home</span> SEDS Forms Home
           </a>
-          <a href="index.html" class="btn btn-ghost">
+          <a href="https://kumaraguruseds.space/" class="btn btn-ghost">
             <span class="material-icons-round">edit_note</span> Admin Portal
           </a>
         </div>
