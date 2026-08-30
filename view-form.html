@@ -3,9 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Primary Meta Tags -->
   <title>Form — Kumaraguru SEDS</title>
-  <meta name="description" content="Fill out a Kumaraguru SEDS form.">
+  <meta name="title" content="Form — Kumaraguru SEDS">
+  <meta name="description" content="Fill out this form from Kumaraguru SEDS.">
   <link rel="icon" href="SEDS.png" type="image/png">
+  <link rel="apple-touch-icon" href="SEDS.png">
+
+  <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://forms.kumaraguruseds.space/view-form.html">
+  <meta property="og:title" content="Form — Kumaraguru SEDS">
+  <meta property="og:description" content="Fill out this form from Kumaraguru SEDS.">
+  <meta property="og:image" content="https://forms.kumaraguruseds.space/SEDS.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Kumaraguru SEDS">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://forms.kumaraguruseds.space/view-form.html">
+  <meta name="twitter:title" content="Form — Kumaraguru SEDS">
+  <meta name="twitter:description" content="Fill out this form from Kumaraguru SEDS.">
+  <meta name="twitter:image" content="https://forms.kumaraguruseds.space/SEDS.png">
+
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <script src="config.js"></script>
@@ -461,9 +482,9 @@
 <!-- Header -->
 <header class="site-header">
   <div class="left-header">
-    <a href="index.html" title="SEDS Home"><img class="logo-kct" src="kumaraguru.png" alt="Kumaraguru Institutions" onerror="this.style.display='none'"></a>
+    <a href="https://kumaraguruseds.space/" title="SEDS Home"><img class="logo-kct" src="kumaraguru.png" alt="Kumaraguru Institutions" onerror="this.style.display='none'"></a>
   </div>
-  <a href="index.html" title="SEDS Home"><img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'"></a>
+  <a href="https://kumaraguruseds.space/" title="SEDS Home"><img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'"></a>
 </header>
 
 <!-- Loading Screen -->
@@ -681,7 +702,42 @@ async function loadForm(formId){
   }
 
   formDef=form;
+  applyFormMeta(form);
   renderForm();
+}
+
+function applyFormMeta(form) {
+  if (!form) return;
+  const title = (form.title && form.title !== 'Untitled form' ? form.title : 'SEDS Form') + ' — Kumaraguru SEDS';
+  const desc = form.description || 'Fill out this form from Kumaraguru SEDS.';
+  const defaultImg = (window.location.origin + window.location.pathname).replace(/[^/]*$/, '') + 'SEDS.png';
+  
+  let img = form.headerImage || form.titleImage || form.bannerImage || defaultImg;
+  if (img && !img.startsWith('http') && !img.startsWith('data:')) {
+    img = (window.location.origin + window.location.pathname).replace(/[^/]*$/, '') + img;
+  }
+
+  document.title = title;
+  setMetaTag('title', title, 'name');
+  setMetaTag('og:title', title);
+  setMetaTag('twitter:title', title);
+  setMetaTag('description', desc, 'name');
+  setMetaTag('og:description', desc);
+  setMetaTag('twitter:description', desc);
+  setMetaTag('og:image', img);
+  setMetaTag('twitter:image', img);
+  setMetaTag('og:url', window.location.href);
+  setMetaTag('twitter:url', window.location.href);
+}
+
+function setMetaTag(nameOrProperty, content, attr = 'property') {
+  let el = document.querySelector(`meta[${attr}="${nameOrProperty}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, nameOrProperty);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
 }
 
 function showError(msg){
