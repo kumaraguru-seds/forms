@@ -3466,7 +3466,7 @@
     const GAS_KEY = 'seds_gas_url';
     const FORMS_KEY = 'seds_forms_v2';
     const AUTH_KEY = 'seds_admin_auth';
-    const BASE = window.location.origin + window.location.pathname.replace(/forms\.html.*/, '');
+    const BASE = window.location.origin + window.location.pathname.replace(/(forms|index)\.html.*/i, '').replace(/\/?$/, '/');
     const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
     const DELETED_KEY = 'seds_deleted_forms';
 
