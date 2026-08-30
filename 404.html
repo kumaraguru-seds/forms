@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEDS | Redirecting...</title>
+  <link rel="icon" href="SEDS.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.15);
+      --accent: #4da6ff;
+      --text: #ffffff;
+      --muted: #a0aec0;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 20px;
+    }
+
+    /* Cosmic Background */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url('background.jpg') no-repeat center center/cover fixed;
+      filter: brightness(40%);
+      z-index: -2;
+    }
+
+    /* Falling Star Animation */
+    .stars-container {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #fff, 0 0 20px #4da6ff;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-20px) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(105vh) translateX(40px);
+        opacity: 0;
+      }
+    }
+
+    /* Glassmorphic Container */
+    .redirect-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      animation: scaleIn 0.4s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .logo-img {
+      height: 70px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 12px rgba(77, 166, 255, 0.5));
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(77, 166, 255, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .slug-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(77, 166, 255, 0.15);
+      border: 1px solid rgba(77, 166, 255, 0.3);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    .btn-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4da6ff, #0066cc);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(77, 166, 255, 0.5);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .error-code {
+      font-size: 64px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ef4444, #ff8a80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stars-container" id="starsContainer"></div>
+
+  <div class="redirect-card" id="cardContent">
+    <img src="SEDS.png" alt="Kumaraguru SEDS" class="logo-img">
+    <div class="spinner" id="spinner"></div>
+    <h1 class="title" id="pageTitle">Locating Short Link...</h1>
+    <div id="slugDisplay" class="slug-badge" style="display:none"></div>
+    <p class="desc" id="pageDesc">Please wait while we connect you to your destination...</p>
+    <div class="btn-wrap" id="actionButtons" style="display:none">
+      <a href="index.html" class="btn btn-primary">
+        <span class="material-icons-round">home</span> Go to SEDS Home
+      </a>
+      <a href="forms.html" class="btn btn-ghost">
+        <span class="material-icons-round">assignment</span> Admin Forms Portal
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Initialize falling stars
+    function initStars() {
+      const c = document.getElementById('starsContainer');
+      if (!c) return;
+      for (let i = 0; i < 70; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const sz = Math.random() * 3 + 1;
+        s.style.width = `${sz}px`;
+        s.style.height = `${sz}px`;
+        s.style.left = `${Math.random() * 100}%`;
+        const dur = Math.random() * 5 + 3;
+        s.style.animationDuration = `${dur}s`;
+        s.style.animationDelay = `${Math.random() * 5}s`;
+        c.appendChild(s);
+      }
+    }
+    initStars();
+
+    // Extract slug from URL
+    function getSlug() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('s')) return params.get('s').trim();
+      if (params.has('slug')) return params.get('slug').trim();
+      if (params.has('id')) return params.get('id').trim();
+
+      let path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+      const parts = path.split('/');
+
+      // Remove base directory if inside GitHub pages repo
+      if (parts[0] && parts[0].toLowerCase() === 'forms') {
+        parts.shift();
+      }
+      return parts.join('/') || '';
+    }
+
+    async function processRedirect() {
+      const slug = getSlug();
+      const slugBadge = document.getElementById('slugDisplay');
+      const title = document.getElementById('pageTitle');
+      const desc = document.getElementById('pageDesc');
+      const spinner = document.getElementById('spinner');
+      const actions = document.getElementById('actionButtons');
+
+      if (!slug || slug === '404' || slug === '404.html') {
+        showNotFound('No short link slug was provided in the URL.');
+        return;
+      }
+
+      slugBadge.textContent = '🔍 ' + slug;
+      slugBadge.style.display = 'inline-flex';
+
+      // 1. Direct Form ID Check (e.g. SEDSRJQeGtLNk2)
+      if (/^SEDS[A-Za-z0-9_-]{6,}$/i.test(slug)) {
+        title.textContent = 'Redirecting to SEDS Form...';
+        desc.textContent = 'Opening form response view...';
+        setTimeout(() => {
+          window.location.replace(`view-form.html?id=${encodeURIComponent(slug)}`);
+        }, 300);
+        return;
+      }
+
+      // 2. Fetch links.json sources
+      let linksMap = null;
+      const sources = [
+        'links.json',
+        './links.json',
+        'shorturl/links.json',
+        'https://raw.githubusercontent.com/kumaraguru-seds/forms/main/links.json'
+      ];
+
+      for (const src of sources) {
+        try {
+          const res = await fetch(`${src}?t=${Date.now()}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              linksMap = data;
+              break;
+            }
+          }
+        } catch (e) {
+          // Continue trying fallback sources
+        }
+      }
+
+      if (linksMap) {
+        // Find exact or case-insensitive match
+        let targetUrl = linksMap[slug];
+        if (!targetUrl) {
+          const lowerSlug = slug.toLowerCase();
+          for (const k in linksMap) {
+            if (k.toLowerCase() === lowerSlug) {
+              targetUrl = linksMap[k];
+              break;
+            }
+          }
+        }
+
+        if (targetUrl) {
+          title.textContent = '🚀 Launching Destination...';
+          desc.textContent = `Redirecting you to: ${targetUrl}`;
+          setTimeout(() => {
+            window.location.replace(targetUrl);
+          }, 350);
+          return;
+        }
+      }
+
+      // 3. Fallback: Check Apps Script for latest dynamic links
+      const SHORTENER_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
+      try {
+        const gasRes = await fetch(`${SHORTENER_APPS_SCRIPT}?action=checkSlug&slug=${encodeURIComponent(slug)}`);
+        if (gasRes.ok) {
+          const gasData = await gasRes.json();
+          // If slug is taken, it exists in the system
+          if (gasData && gasData.available === false && gasData.longUrl) {
+            title.textContent = '🚀 Launching Destination...';
+            desc.textContent = `Redirecting to destination...`;
+            setTimeout(() => {
+              window.location.replace(gasData.longUrl);
+            }, 350);
+            return;
+          }
+        }
+      } catch (e) { }
+
+      // 4. Not found
+      showNotFound(`The short link "${slug}" was not found or has expired.`);
+    }
+
+    function showNotFound(msg) {
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('cardContent').innerHTML = `
+        <img src="SEDS.png" alt="Kumaraguru SEDS" class="logo-img">
+        <div class="error-code">404</div>
+        <h1 class="title">Link Not Found</h1>
+        <p class="desc">${msg}</p>
+        <div class="btn-wrap">
+          <a href="index.html" class="btn btn-primary">
+            <span class="material-icons-round">home</span> SEDS Forms Home
+          </a>
+          <a href="shorturl/shorturl.html" class="btn btn-ghost">
+            <span class="material-icons-round">link</span> Create a Short Link
+          </a>
+        </div>
+      `;
+    }
+
+    processRedirect();
+  </script>
+</body>
+
+</html>

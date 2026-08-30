@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form — Kumaraguru SEDS</title>
+  <meta name="description" content="Fill out a Kumaraguru SEDS form.">
+  <link rel="icon" href="SEDS.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#070f1e;--text:#f0f4ff;--muted:#8da4c4;
+      --card:rgba(255,255,255,.08);--card2:rgba(255,255,255,.11);
+      --accent:#4da6ff;--accent2:#7b4fff;--accent-dark:#2878d8;
+      --danger:#ff5252;--success:#4caf50;--warning:#ffb300;
+      --border:rgba(255,255,255,.1);--input-bg:rgba(255,255,255,.05);
+      --focus:#4da6ff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;position:relative;z-index:0}
+    body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background:url('background.jpg') no-repeat center center/cover fixed;filter:brightness(35%);z-index:-2}::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    /* STARS — falling style matching index.html */
+    .stars-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+    .star{
+      position:absolute;background-color:#fff;border-radius:50%;
+      box-shadow:0 0 6px #fff,0 0 12px #fff;
+      animation:fall linear infinite,twinkle ease-in-out infinite;
+    }
+    @keyframes fall{from{transform:translateY(-20px);opacity:1}to{transform:translateY(100vh);opacity:0}}
+    @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+
+    /* Header (Matching index.html) */
+    .site-header{
+      position:sticky;top:0;z-index:100;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 24px;height:70px;
+    }
+    .left-header{display:flex;align-items:center;gap:15px}
+    .logo-kct{height:60px;object-fit:contain;transition:0.3s}
+    .logo-seds{height:70px;object-fit:contain;transition:0.3s}
+    .logo-kct:hover, .logo-seds:hover{transform:scale(1.04)}
+
+    /* Form Banner Image */
+    .form-header-banner{
+      width:100%;background-size:cover;background-position:center;
+      border-radius:14px 14px 0 0;margin-bottom:-6px;border:1px solid var(--border);
+      border-bottom:none;
+    }
+
+    /* Loading Screen */
+    .loading-screen{
+      position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:rgba(11,15,25,0.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+      z-index:200;gap:20px;color:var(--text);padding:20px;transition:opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .loading-gif-container{
+      width:260px;height:260px;background-color:#ffffff;border-radius:18px;
+      display:flex;justify-content:center;align-items:center;
+      box-shadow:0 0 25px rgba(77,166,255,0.4),0 0 45px rgba(0,0,0,0.7);
+      padding:0;overflow:hidden;animation:loadingPulse 1.6s infinite alternate;
+    }
+    .loading-gif{
+      width:100%;height:100%;object-fit:cover;border-radius:18px;display:block;
+    }
+    .loading-message-box{
+      background:rgba(19,34,51,0.85);border:1px solid rgba(77,166,255,0.35);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;
+      padding:12px 24px;border-radius:24px;font-weight:600;font-size:14px;
+      display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    }
+    @keyframes loadingPulse{
+      from{transform:scale(0.94);box-shadow:0 0 15px rgba(255,255,255,0.3)}
+      to{transform:scale(1.0);box-shadow:0 0 32px rgba(77,166,255,0.85)}
+    }
+    @media(max-width:600px){
+      .loading-gif-container{width:210px;height:210px}
+    }
+    .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Form wrap */
+    .form-wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:28px 16px 60px}
+
+    /* Title card */
+    .form-title-card{
+      background:var(--card);
+      border:1px solid var(--border);border-top:6px solid var(--accent);
+      border-radius:14px;padding:28px 32px;margin-bottom:14px;
+    }
+    .form-title{font-size:26px;font-weight:700;margin-bottom:8px}
+    .form-desc{font-size:14px;color:var(--muted);line-height:1.6}
+
+    /* Email field */
+    .email-field{
+      background:var(--card);border:1px solid var(--border);border-radius:12px;
+      padding:20px 24px;margin-bottom:12px;
+    }
+    .email-field label{font-size:13px;font-weight:500;display:block;margin-bottom:8px}
+    .email-field label span{color:var(--danger);margin-left:3px}
+
+    /* Question cards */
+    .q-card{
+      background:var(--card);
+      border:1px solid var(--border);border-radius:12px;padding:22px 24px;
+      margin-bottom:12px;transition:border-color .2s;
+    }
+    .q-card:focus-within{border-color:rgba(77,166,255,.3)}
+    .q-label{font-size:15px;font-weight:500;margin-bottom:6px;line-height:1.4}
+    .q-label .req{color:var(--danger);margin-left:4px}
+    .q-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+    .q-img{max-width:100%;border-radius:10px;margin-bottom:12px;display:block}
+    .q-error{font-size:12px;color:var(--danger);margin-top:6px;display:none;align-items:center;gap:4px}
+    .q-error.show{display:flex}
+    .q-error .material-icons-round{font-size:15px}
+
+    /* Inputs */
+    .text-inp{
+      width:100%;background:transparent;border:none;
+      border-bottom:1px solid var(--border);color:var(--text);
+      font-family:'Poppins',sans-serif;font-size:14px;padding:6px 0;
+      outline:none;transition:border-color .2s;
+    }
+    .text-inp:focus{border-color:var(--accent)}
+    .text-inp.error{border-color:var(--danger)}
+    .text-inp::placeholder{color:var(--muted)}
+    .para-inp{
+      width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;
+      padding:10px 12px;outline:none;resize:vertical;min-height:80px;
+      transition:border-color .2s;
+    }
+    .para-inp:focus{border-color:var(--accent)}
+    .para-inp.error{border-color:var(--danger)}
+
+    /* Options */
+    .opt-item{
+      display:flex;align-items:center;gap:10px;padding:9px 12px;
+      border-radius:8px;cursor:pointer;transition:background .15s;
+      margin-bottom:6px;
+    }
+    .opt-item:hover{background:rgba(255,255,255,.05)}
+    .opt-item.selected{background:rgba(77,166,255,.1);border:1px solid rgba(77,166,255,.2)}
+    .opt-item input[type=radio],.opt-item input[type=checkbox]{
+      width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;
+    }
+    .opt-item label{font-size:14px;cursor:pointer;flex:1}
+    .other-text-inp{
+      flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);
+      color:var(--text);font-family:'Poppins',sans-serif;font-size:13px;padding:2px 0;outline:none;
+    }
+    .other-text-inp:focus{border-color:var(--accent)}
+
+    /* Select Dropdowns (Fix white background/white text in Chrome/Windows) */
+    select, .sel-inp{
+      background:#0d192d !important;
+      background-color:#0d192d !important;
+      color:#f0f4ff !important;
+      border:1px solid rgba(255,255,255,0.2) !important;
+      border-radius:8px !important;
+      padding:10px 14px !important;
+      font-family:'Poppins',sans-serif !important;
+      font-size:13px !important;
+      outline:none !important;
+      cursor:pointer !important;
+      color-scheme:dark !important;
+      appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%238da4c4'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+    }
+    select option, .sel-inp option{
+      background:#0d192d !important;
+      background-color:#0d192d !important;
+      color:#ffffff !important;
+      padding:8px 12px !important;
+      font-size:13px !important;
+    }
+    select:focus, .sel-inp:focus{
+      border-color:var(--accent) !important;
+      box-shadow:0 0 10px rgba(77,166,255,0.35) !important;
+    }
+
+    /* Scale */
+    .scale-wrap{overflow-x:auto;padding-bottom:8px}
+    .scale-grid{
+      display:flex;align-items:flex-start;gap:0;
+    }
+    .scale-col{
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      min-width:44px;cursor:pointer;
+    }
+    .scale-col label{
+      font-size:11px;color:var(--muted);text-align:center;cursor:pointer;
+      max-width:60px;line-height:1.2;
+    }
+    .scale-col input[type=radio]{
+      width:20px;height:20px;accent-color:var(--accent);cursor:pointer;
+    }
+    .scale-col span{font-size:13px;color:var(--muted);font-weight:500}
+    .scale-edge-labels{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--muted)}
+
+    /* Rating stars */
+    .stars-wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:6px 0}
+    .star-btn{
+      background:transparent;border:none;cursor:pointer;padding:6px;
+      border-radius:50%;transition:transform .15s, background-color .15s;line-height:1;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    .star-btn:hover{transform:scale(1.25);background:rgba(255,255,255,0.06)}
+    .star-btn .material-icons-round{font-size:38px;transition:color .2s, text-shadow .2s;color:rgba(255,255,255,.25)}
+    .star-btn.active .material-icons-round{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,0.55)}
+    .star-btn.heart.active .material-icons-round{color:#ff4081;text-shadow:0 0 12px rgba(255,64,129,0.55)}
+    .star-btn.thumb.active .material-icons-round{color:var(--accent);text-shadow:0 0 12px rgba(77,166,255,0.65)}
+
+    /* File upload */
+    .file-drop-zone{
+      border:2px dashed var(--border);border-radius:12px;padding:28px;
+      text-align:center;cursor:pointer;transition:all .2s;background:var(--input-bg);
+    }
+    .file-drop-zone:hover,.file-drop-zone.drag{
+      border-color:var(--accent);background:rgba(77,166,255,.06);
+    }
+    .file-drop-zone.error{border-color:var(--danger)}
+    .file-drop-zone .material-icons-round{font-size:40px;color:var(--accent);display:block;margin-bottom:8px}
+    .file-drop-zone p{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .file-drop-zone .file-btn{
+      display:inline-flex;align-items:center;gap:6px;
+      background:var(--accent);color:#fff;border:none;
+      padding:7px 16px;border-radius:8px;font-family:'Poppins',sans-serif;
+      font-size:13px;font-weight:500;cursor:pointer;transition:background .2s;
+    }
+    .file-drop-zone .file-btn:hover{background:var(--accent-dark)}
+    .file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+    .file-item{
+      display:flex;align-items:center;gap:8px;background:var(--card2);
+      border-radius:8px;padding:8px 12px;font-size:12px;
+    }
+    .file-item .material-icons-round{font-size:18px;color:var(--accent)}
+    .file-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .file-item-size{color:var(--muted);flex-shrink:0}
+    .file-item-del{
+      background:transparent;border:none;color:var(--muted);cursor:pointer;
+      padding:2px;border-radius:50%;display:flex;align-items:center;transition:color .2s;
+    }
+    .file-item-del:hover{color:var(--danger)}
+    .file-item-del .material-icons-round{font-size:16px}
+    .file-upload-status{font-size:11px;color:var(--muted);margin-top:6px}
+    .file-upload-status.uploading{color:var(--accent)}
+    .file-upload-status.done{color:var(--success)}
+    .file-upload-status.err{color:var(--danger)}
+
+    /* Grid */
+    .grid-table{width:100%;border-collapse:collapse;font-size:13px;overflow-x:auto;display:block}
+    .grid-table th,.grid-table td{padding:10px 8px;border:1px solid var(--border);text-align:center}
+    .grid-table th{background:rgba(77,166,255,.1);color:var(--accent);font-weight:600}
+    .grid-table td:first-child{text-align:left;color:var(--muted);font-weight:500}
+    .grid-table input{accent-color:var(--accent);width:18px;height:18px;cursor:pointer}
+
+    /* Date/Time */
+    .date-inp{
+      background:var(--input-bg);border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;
+      padding:10px 12px;outline:none;transition:border-color .2s;
+      color-scheme:dark;
+    }
+    .date-inp:focus{border-color:var(--accent)}
+    .date-inp.error{border-color:var(--danger)}
+
+    /* Progress bar */
+    .progress-wrap{margin-bottom:16px;position:relative;z-index:1}
+    .progress-label{font-size:12px;color:var(--muted);margin-bottom:6px;text-align:right}
+    .progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+
+    /* Multi-step Stepper / Wizard matching reference design */
+    .stepper-wrap{
+      background:rgba(19,34,51,0.85);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;padding:22px 24px;margin-bottom:20px;
+      box-shadow:0 10px 32px rgba(0,0,0,0.35);
+      position:relative;z-index:1;
+    }
+    .stepper-track{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      position:relative;overflow-x:auto;padding-bottom:4px;gap:6px;
+    }
+    .step-node{
+      display:flex;flex-direction:column;align-items:center;
+      position:relative;z-index:2;cursor:pointer;
+      transition:all .25s ease;min-width:64px;max-width:110px;flex-shrink:0;
+    }
+    .step-circle{
+      width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;font-weight:600;
+      transition:all .3s cubic-bezier(0.4,0,0.2,1);
+      background:rgba(255,255,255,0.05);
+      border:2px solid rgba(255,255,255,0.22);
+      color:var(--muted);
+    }
+    .step-node.completed .step-circle{
+      background:rgba(77,166,255,0.2);
+      border-color:var(--accent);color:var(--accent);
+      box-shadow:0 0 12px rgba(77,166,255,0.35);
+    }
+    .step-node.completed:hover .step-circle{
+      transform:scale(1.1);background:var(--accent);color:#fff;
+    }
+    .step-node.active .step-circle{
+      background:linear-gradient(135deg,#2563eb,#3b82f6);
+      border-color:transparent;color:#fff;
+      box-shadow:0 0 18px rgba(37,99,235,0.65);
+      transform:scale(1.08);font-weight:700;
+    }
+    .step-node.upcoming .step-circle{
+      border:2px dashed rgba(255,255,255,0.25);
+      background:rgba(255,255,255,0.02);
+      color:rgba(255,255,255,0.4);
+    }
+    .step-label{
+      font-size:12px;font-weight:500;margin-top:8px;
+      text-align:center;color:var(--muted);
+      line-height:1.3;transition:all .25s;word-break:break-word;
+    }
+    .step-node.active .step-label{
+      color:#fff;font-weight:600;
+      text-shadow:0 0 10px rgba(77,166,255,0.5);
+    }
+    .step-node.completed .step-label{
+      color:var(--accent);
+    }
+    .step-connector{
+      flex:1;height:2px;margin-top:19px;margin-left:4px;margin-right:4px;
+      border-top:2px dashed rgba(255,255,255,0.22);
+      transition:all .3s;min-width:20px;
+    }
+    .step-connector.completed{
+      border-top:none;background:linear-gradient(90deg,var(--accent),#2563eb);
+      box-shadow:0 0 8px rgba(77,166,255,0.4);
+    }
+
+    /* Section Header Card (Section 2+) */
+    .section-hdr-card{
+      background:var(--card);
+      border:1px solid rgba(123,79,255,0.3);
+      border-top:6px solid var(--accent2);
+      border-radius:14px;padding:28px 32px;margin-bottom:16px;
+      animation:fadeUp .3s ease;
+    }
+    .sec-badge{
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(123,79,255,0.18);
+      border:1px solid rgba(123,79,255,0.35);
+      color:var(--accent2);font-size:11px;font-weight:700;
+      letter-spacing:1px;padding:3px 10px;border-radius:12px;
+      margin-bottom:10px;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Navigation / Submit buttons matching reference */
+    .submit-wrap{display:flex;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap}
+    .nav-prev-btn{
+      border:2px solid var(--accent);color:var(--accent);
+      background:transparent;padding:12px 28px;border-radius:28px;
+      font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;
+      cursor:pointer;transition:all .25s;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .nav-prev-btn:hover{
+      background:rgba(77,166,255,0.15);
+      box-shadow:0 0 14px rgba(77,166,255,0.25);
+      transform:translateX(-2px);
+    }
+    .nav-next-btn{
+      background:linear-gradient(135deg,#2563eb,#3b82f6);
+      color:#fff;border:none;padding:12px 34px;border-radius:28px;
+      font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;
+      cursor:pointer;box-shadow:0 4px 18px rgba(37,99,235,0.4);
+      transition:all .25s;display:inline-flex;align-items:center;gap:8px;
+    }
+    .nav-next-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 6px 24px rgba(37,99,235,0.55);
+    }
+    .submit-btn{
+      background:linear-gradient(135deg,#10b981,#059669);
+      color:#fff;border:none;padding:12px 36px;border-radius:28px;
+      font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;
+      cursor:pointer;transition:all .3s;box-shadow:0 4px 18px rgba(16,185,129,0.35);
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(16,185,129,0.5)}
+    .submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .clear-btn{
+      background:transparent;border:1px solid var(--border);color:var(--muted);
+      padding:12px 24px;border-radius:28px;font-family:'Poppins',sans-serif;font-size:14px;
+      cursor:pointer;transition:all .2s;margin-left:auto;
+    }
+    .clear-btn:hover{border-color:var(--danger);color:var(--danger)}
+
+    /* Thank you screen */
+    #thankYou{
+      display:none;position:relative;z-index:1;
+      max-width:600px;margin:60px auto;padding:0 16px;text-align:center;
+    }
+    .ty-card{
+      background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:48px 36px;
+    }
+    .ty-icon{font-size:72px;color:var(--success);margin-bottom:16px;display:block}
+    .ty-title{font-size:26px;font-weight:700;margin-bottom:10px}
+    .ty-msg{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+    .ty-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .ty-btn{
+      display:inline-flex;align-items:center;gap:6px;
+      background:var(--card2);border:1px solid var(--border);color:var(--text);
+      padding:10px 22px;border-radius:20px;font-family:'Poppins',sans-serif;
+      font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;
+      transition:all .2s;
+    }
+    .ty-btn:hover{background:rgba(77,166,255,.15);border-color:rgba(77,166,255,.3)}
+    .ty-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 4px 14px rgba(77,166,255,.3)}
+
+    /* Error screen */
+    #errorScreen{
+      display:none;position:relative;z-index:1;
+      max-width:500px;margin:80px auto;padding:0 16px;text-align:center;
+    }
+    .err-icon{font-size:64px;color:var(--muted);display:block;margin-bottom:14px}
+    .err-title{font-size:20px;font-weight:600;margin-bottom:8px}
+    .err-desc{font-size:14px;color:var(--muted)}
+
+    /* Toast */
+    .toast{
+      position:fixed;bottom:20px;right:20px;background:#0f1f36;border:1px solid var(--border);
+      border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:8px;
+      font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:3000;
+      animation:toastIn .3s ease;max-width:290px;
+    }
+    @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .toast .material-icons-round{font-size:18px}
+    .toast.success .material-icons-round{color:var(--success)}
+    .toast.error .material-icons-round{color:var(--danger)}
+    .toast.info .material-icons-round{color:var(--accent)}
+    .hidden{display:none!important}
+    @media(max-width:600px){
+      .form-title-card,.q-card{padding:18px 16px}
+      .form-title{font-size:20px}
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars-container" id="starsContainer"></div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="left-header">
+    <a href="index.html" title="SEDS Home"><img class="logo-kct" src="kumaraguru.png" alt="Kumaraguru Institutions" onerror="this.style.display='none'"></a>
+  </div>
+  <a href="index.html" title="SEDS Home"><img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'"></a>
+</header>
+
+<!-- Loading Screen -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-gif-container">
+    <img src="loading.gif" alt="Loading SEDS Form..." class="loading-gif" onerror="this.src='SEDS.png'">
+  </div>
+  <div class="loading-message-box">
+    <span class="material-icons-round" style="font-size:18px;animation:spin 1s linear infinite;color:var(--accent)">sync</span>
+    <span id="loadingMsgText">Connecting to SEDS Form Database...</span>
+  </div>
+</div>
+
+<!-- Error -->
+<div id="errorScreen">
+  <span class="material-icons-round err-icon">error_outline</span>
+  <div class="err-title">Form Not Found</div>
+  <div class="err-desc" id="errMsg">This form doesn't exist or is no longer available.</div>
+</div>
+
+<!-- Form -->
+<div id="formView" class="hidden">
+  <div class="form-wrap">
+    <!-- Multi-step Stepper -->
+    <div id="stepperWrap" class="stepper-wrap hidden">
+      <div class="stepper-track" id="stepperTrack"></div>
+    </div>
+
+    <!-- Progress bar -->
+    <div id="progressWrap" class="progress-wrap hidden">
+      <div class="progress-label" id="progressLabel">0 of 0</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Main Title Card with Banner (Section 1) -->
+    <div id="viewerBannerImg" class="form-header-banner hidden"></div>
+    <div class="form-title-card" id="formTitleCard">
+      <div class="form-title" id="formTitle">Loading...</div>
+      <div class="form-desc" id="formDesc"></div>
+      <div id="formTitleImgWrap"></div>
+    </div>
+
+    <!-- Section Header Card (Section 2+) -->
+    <div class="section-hdr-card hidden" id="sectionHdrCard">
+      <div class="sec-badge" id="secBadge">SECTION 2</div>
+      <div class="section-title" id="secTitle"></div>
+      <div class="section-desc" id="secDesc"></div>
+    </div>
+
+    <!-- Email field -->
+    <div id="emailField" class="email-field hidden">
+      <label for="emailInput">Email address<span>*</span></label>
+      <input type="email" id="emailInput" class="text-inp" placeholder="your@email.com">
+      <div class="q-error" id="emailError">
+        <span class="material-icons-round">error</span><span>Please enter a valid email.</span>
+      </div>
+    </div>
+
+    <!-- Questions for current step -->
+    <div id="questionsList"></div>
+
+    <!-- Navigation / Submit buttons -->
+    <div class="submit-wrap">
+      <button type="button" class="nav-prev-btn hidden" id="prevStepBtn" onclick="prevSection()">
+        <span class="material-icons-round">arrow_back</span> Previous Step
+      </button>
+      <button type="button" class="nav-next-btn" id="nextStepBtn" onclick="nextSection()">
+        Next Step <span class="material-icons-round">arrow_forward</span>
+      </button>
+      <button type="button" class="submit-btn hidden" id="submitBtn" onclick="submitForm()">
+        <span class="material-icons-round">send</span> Submit
+      </button>
+      <button type="button" class="clear-btn" onclick="clearForm()">Clear form</button>
+    </div>
+  </div>
+</div>
+
+<!-- Thank you -->
+<div id="thankYou">
+  <div class="ty-card">
+    <span class="material-icons-round ty-icon">check_circle</span>
+    <div class="ty-title">Response submitted!</div>
+    <div class="ty-msg" id="tyMsg">Your response has been recorded.</div>
+    <div class="ty-actions" id="tyActions">
+      <a href="#" id="submitAnotherBtn" class="ty-btn" onclick="resetForm();return false">
+        <span class="material-icons-round">refresh</span> Submit another response
+      </a>
+      <a href="index.html" class="ty-btn primary">
+        <span class="material-icons-round">home</span> Go to SEDS site
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+//  CONFIG
+// =========================================================
+const GAS_KEY   = 'seds_gas_url';
+const FORMS_KEY = 'seds_forms_v2';
+let GAS_URL     = localStorage.getItem(GAS_KEY) || '';
+
+// =========================================================
+//  STATE
+// =========================================================
+let formDef       = null;  // form definition
+let answers       = {};    // { questionId: value }
+let fileUploads   = {};    // { questionId: [{ file, url, name }] }
+let tempResId     = null;  // temp response ID for file grouping
+let formSections  = [];    // [ { index, id, title, description, questions: [] } ]
+let curSectionIdx = 0;     // current active section index
+
+// =========================================================
+//  UTILS
+// =========================================================
+const uid = (l=8) => {
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  return Array.from({length:l},()=>c[Math.random()*c.length|0]).join('');
+};
+const esc = s=>{const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;};
+const fmtSize = b=>{
+  if(b<1024) return b+'B';
+  if(b<1024*1024) return (b/1024).toFixed(1)+'KB';
+  return (b/1024/1024).toFixed(1)+'MB';
+};
+
+let toastT;
+function toast(msg,type='info',dur=3000){
+  clearTimeout(toastT);
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const icons={success:'check_circle',error:'error',info:'info'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span class="material-icons-round">${icons[type]||'info'}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  toastT=setTimeout(()=>{t.style.animation='toastIn .3s ease reverse';setTimeout(()=>t.remove(),300);},dur);
+}
+
+// =========================================================
+//  STARS
+// =========================================================
+function initStars(){
+  const c=document.getElementById('starsContainer');
+  if(!c) return;
+  const numberOfStars=200;
+  function createStar(){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*3+1;
+    s.style.width=`${sz}px`;
+    s.style.height=`${sz}px`;
+    s.style.left=`${Math.random()*100}%`;
+    const duration=Math.random()*5+3;
+    const twinkleDuration=Math.random()*2+1;
+    s.style.animation=`fall ${duration}s linear infinite,twinkle ${twinkleDuration}s ease-in-out infinite`;
+    s.style.animationDelay=`${Math.random()*8}s,-${Math.random()*twinkleDuration}s`;
+    c.appendChild(s);
+  }
+  for(let i=0;i<numberOfStars;i++) createStar();
+}
+
+// =========================================================
+//  INIT
+// =========================================================
+async function init(){
+  initStars();
+  tempResId = 'RES'+uid(12).toUpperCase();
+  const p=new URLSearchParams(location.search);
+  const formId=p.get('id');
+  if(!formId){ showError('No form ID in URL.'); return; }
+  await loadForm(formId);
+}
+
+async function loadForm(formId){
+  const msgEl = document.getElementById('loadingMsgText');
+  const loadingSteps = [
+    'Connecting to SEDS Form Database...',
+    'Fetching Form Structure & Questions...',
+    'Rendering Responsive Experience...'
+  ];
+  let stepIdx = 0;
+  const msgTimer = setInterval(() => {
+    stepIdx = (stepIdx + 1) % loadingSteps.length;
+    if (msgEl) msgEl.textContent = loadingSteps[stepIdx];
+  }, 900);
+
+  // Guarantee smooth minimum animation duration
+  const minDelay = new Promise(resolve => setTimeout(resolve, 600));
+
+  // Try local storage first
+  let form = null;
+  try{
+    const local=JSON.parse(localStorage.getItem(FORMS_KEY)||'{}');
+    form=local[formId]||null;
+  } catch(e){}
+
+  // Fetch from GAS (always try if GAS available, use latest)
+  if(GAS_URL){
+    try{
+      const d=await gasGet({action:'getForm',formId});
+      if(d&&!d.error) form=d;
+    } catch(e){}
+  }
+
+  await minDelay;
+  clearInterval(msgTimer);
+
+  if(!form){ showError('This form does not exist or has been removed.'); return; }
+
+  // Check if accepting responses
+  if(!form.settings?.acceptResp && form.published){
+    showClosed(form); return;
+  }
+
+  formDef=form;
+  renderForm();
+}
+
+function showError(msg){
+  clearInterval(window.loadMsgInterval);
+  const lScreen = document.getElementById('loadingScreen');
+  if (lScreen) lScreen.style.display='none';
+  document.getElementById('errMsg').textContent=msg;
+  document.getElementById('errorScreen').style.display='block';
+}
+
+function showClosed(form){
+  clearInterval(window.loadMsgInterval);
+  const lScreen = document.getElementById('loadingScreen');
+  if (lScreen) lScreen.style.display='none';
+  document.getElementById('errMsg').textContent=
+    form.settings?.closedMsg||'This form is no longer accepting responses.';
+  document.getElementById('errorScreen').style.display='block';
+}
+
+// =========================================================
+//  BUILD FORM SECTIONS
+// =========================================================
+function buildFormSections(){
+  const f=formDef; if(!f) return [];
+  const rawQs = f.settings?.shuffle ? shuffleArr([...(f.questions||[])]) : (f.questions||[]);
+  const sections = [];
+
+  let curSec = {
+    index: 0,
+    id: 'sec_0',
+    title: 'General',
+    description: '',
+    questions: []
+  };
+
+  for(let i=0; i<rawQs.length; i++){
+    const q = rawQs[i];
+    if(q.type === 'section'){
+      sections.push(curSec);
+      curSec = {
+        index: sections.length,
+        id: q.id,
+        title: q.title || `Section ${sections.length + 1}`,
+        description: q.description || '',
+        questions: []
+      };
+    } else {
+      curSec.questions.push(q);
+    }
+  }
+  sections.push(curSec);
+  return sections;
+}
+
+// =========================================================
+//  RENDER FORM & SECTIONS
+// =========================================================
+function renderForm(){
+  const f=formDef; if(!f) return;
+  const lScreen = document.getElementById('loadingScreen');
+  if(lScreen){
+    lScreen.style.opacity = '0';
+    setTimeout(() => { lScreen.style.display='none'; }, 350);
+  }
+  document.getElementById('formView').classList.remove('hidden');
+  document.title=(f.title||'Form')+' — Kumaraguru SEDS';
+  document.getElementById('formTitle').textContent=f.title||'Untitled form';
+  document.getElementById('formDesc').textContent=f.description||'';
+
+  // Apply Theme (Fonts, Colors, Banner)
+  applyViewerTheme(f.theme);
+
+  // Progress bar
+  if(f.settings?.progressBar){
+    document.getElementById('progressWrap').classList.remove('hidden');
+  } else {
+    document.getElementById('progressWrap').classList.add('hidden');
+  }
+
+  // Build section groups
+  formSections = buildFormSections();
+  curSectionIdx = 0;
+
+  // Render current section view
+  renderCurrentSection();
+}
+
+function applyViewerTheme(th){
+  if(!th) return;
+  const color = th.color || '#4da6ff';
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--focus', color);
+
+  const hFont = th.headerFont || 'Poppins';
+  const hSize = th.headerSize || '26px';
+  document.querySelectorAll('.form-title, .section-title').forEach(el => {
+    el.style.fontFamily = `"${hFont}", sans-serif`;
+    if(el.classList.contains('form-title')) el.style.fontSize = hSize;
+  });
+
+  const qFont = th.questionFont || 'Poppins';
+  const qSize = th.questionSize || '15px';
+  document.querySelectorAll('.q-label').forEach(el => {
+    el.style.fontFamily = `"${qFont}", sans-serif`;
+    el.style.fontSize = qSize;
+  });
+
+  const tFont = th.textFont || 'Poppins';
+  const tSize = th.textSize || '13px';
+  document.querySelectorAll('.form-desc, .q-desc, .opt-text, .text-inp, .para-inp, .sel-inp').forEach(el => {
+    el.style.fontFamily = `"${tFont}", sans-serif`;
+    el.style.fontSize = tSize;
+  });
+
+  const banner = document.getElementById('viewerBannerImg');
+  if(banner){
+    if(th.headerImg){
+      banner.style.backgroundImage = `url("${th.headerImg}")`;
+      banner.style.height = th.headerHeight || '160px';
+    }
+  }
+}
+
+// =========================================================
+//  STEPPER WIDGET
+// =========================================================
+function renderStepper(){
+  const wrap = document.getElementById('stepperWrap');
+  const track = document.getElementById('stepperTrack');
+  if(!wrap || !track) return;
+
+  if(!formSections || formSections.length <= 1){
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+
+  let html = '';
+  formSections.forEach((sec, idx)=>{
+    const isCompleted = idx < curSectionIdx;
+    const isActive    = idx === curSectionIdx;
+    const isUpcoming  = idx > curSectionIdx;
+    const stateCls    = isCompleted ? 'completed' : (isActive ? 'active' : 'upcoming');
+    const label       = sec.title || `Section ${idx + 1}`;
+
+    html += `
+      <div class="step-node ${stateCls}" onclick="handleStepClick(${idx})" title="Jump to ${esc(label)}">
+        <div class="step-circle">
+          ${isCompleted ? '<span class="material-icons-round" style="font-size:18px">check</span>' : (idx + 1)}
+        </div>
+        <div class="step-label">${esc(label)}</div>
+      </div>
+    `;
+
+    if(idx < formSections.length - 1){
+      const lineCompleted = idx < curSectionIdx;
+      html += `<div class="step-connector ${lineCompleted ? 'completed' : ''}"></div>`;
+    }
+  });
+
+  track.innerHTML = html;
+}
+
+function handleStepClick(targetIdx){
+  if(targetIdx === curSectionIdx) return;
+  if(targetIdx < curSectionIdx){
+    // Jumping back is always allowed
+    curSectionIdx = targetIdx;
+    renderCurrentSection();
+  } else {
+    // Jumping forward requires validation of current step
+    if(!validateCurrentSection()){
+      toast('Please complete required fields before jumping forward','error');
+      return;
+    }
+    curSectionIdx = targetIdx;
+    renderCurrentSection();
+  }
+}
+
+// =========================================================
+//  RENDER CURRENT SECTION
+// =========================================================
+function renderCurrentSection(){
+  const totalSec = formSections.length;
+  const sec = formSections[curSectionIdx];
+  if(!sec) return;
+
+  // Stepper Header
+  renderStepper();
+
+  // Cards visibility
+  const formTitleCard = document.getElementById('formTitleCard');
+  const secHdrCard    = document.getElementById('sectionHdrCard');
+  const emailField    = document.getElementById('emailField');
+  const banner        = document.getElementById('viewerBannerImg');
+
+  if(curSectionIdx === 0){
+    formTitleCard.style.display = 'block';
+    secHdrCard.classList.add('hidden');
+    if(formDef.theme?.headerImg){
+      banner?.classList.remove('hidden');
+      formTitleCard.style.setProperty('border-radius', '0 0 14px 14px');
+    } else {
+      banner?.classList.add('hidden');
+      formTitleCard.style.setProperty('border-radius', '14px');
+    }
+    const tWrap = document.getElementById('formTitleImgWrap');
+    if(tWrap){
+      if(formDef.titleImage){
+        tWrap.innerHTML = `<div style="margin-top:14px;text-align:center"><img src="${formDef.titleImage}" style="max-height:260px;max-width:100%;border-radius:10px;display:inline-block;border:1px solid var(--border)" alt="Form title image"></div>`;
+      } else {
+        tWrap.innerHTML = '';
+      }
+    }
+    if(formDef.settings?.collectEmail){
+      emailField.classList.remove('hidden');
+    } else {
+      emailField.classList.add('hidden');
+    }
+  } else {
+    banner?.classList.add('hidden');
+    formTitleCard.style.display = 'none';
+    emailField.classList.add('hidden');
+    secHdrCard.classList.remove('hidden');
+    document.getElementById('secBadge').textContent = `SECTION ${curSectionIdx + 1} OF ${totalSec}`;
+    document.getElementById('secTitle').textContent = sec.title || `Section ${curSectionIdx + 1}`;
+    document.getElementById('secDesc').textContent = sec.description || '';
+  }
+
+  // Render questions
+  const list = document.getElementById('questionsList');
+  list.innerHTML = '';
+  (sec.questions || []).forEach((q, i) => list.appendChild(renderQ(q, i)));
+
+  // Restore existing answers in DOM
+  restoreSectionAnswers(sec.questions || []);
+
+  // Update navigation buttons
+  const prevBtn   = document.getElementById('prevStepBtn');
+  const nextBtn   = document.getElementById('nextStepBtn');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if(totalSec <= 1){
+    prevBtn.classList.add('hidden');
+    nextBtn.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+  } else {
+    if(curSectionIdx > 0){
+      prevBtn.classList.remove('hidden');
+    } else {
+      prevBtn.classList.add('hidden');
+    }
+
+    if(curSectionIdx < totalSec - 1){
+      nextBtn.classList.remove('hidden');
+      submitBtn.classList.add('hidden');
+    } else {
+      nextBtn.classList.add('hidden');
+      submitBtn.classList.remove('hidden');
+    }
+  }
+
+  updateProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// =========================================================
+//  RESTORE SECTION ANSWERS
+// =========================================================
+function restoreSectionAnswers(questions){
+  questions.forEach(q => {
+    const val = answers[q.id];
+    if(val === undefined || val === null) return;
+
+    if(['short_answer','paragraph','date','time'].includes(q.type)){
+      const inp = document.getElementById('ans-' + q.id);
+      if(inp) inp.value = val;
+    } else if(q.type === 'multiple_choice'){
+      if(answers['__other__' + q.id] !== undefined || (typeof val === 'string' && val.startsWith('Other: '))){
+        const rad = document.getElementById(`mc-${q.id}-other`);
+        if(rad){ rad.checked = true; rad.closest('.opt-item')?.classList.add('selected'); }
+        const oInp = document.getElementById(`mc-other-${q.id}`);
+        if(oInp) oInp.value = answers['__other__' + q.id] || val.replace('Other: ', '');
+      } else {
+        const rad = document.getElementById(`mc-${q.id}-${esc(val)}`);
+        if(rad){ rad.checked = true; rad.closest('.opt-item')?.classList.add('selected'); }
+      }
+    } else if(q.type === 'checkboxes' && Array.isArray(val)){
+      (q.options || []).forEach((opt, i) => {
+        const cb = document.getElementById(`cb-${q.id}-${i}`);
+        if(cb && val.includes(opt)) cb.checked = true;
+      });
+      const otherItem = val.find(v => typeof v === 'string' && v.startsWith('__OTHER__:'));
+      if(otherItem){
+        const cbOther = document.getElementById(`cb-${q.id}-other`);
+        if(cbOther) cbOther.checked = true;
+        const oInp = document.getElementById(`cb-other-${q.id}`);
+        if(oInp) oInp.value = otherItem.replace('__OTHER__:', '');
+      }
+    } else if(q.type === 'dropdown'){
+      const sel = document.getElementById('ans-' + q.id);
+      if(sel) sel.value = val;
+    } else if(q.type === 'linear_scale'){
+      const rad = document.getElementById(`scale-${q.id}-${val}`);
+      if(rad) rad.checked = true;
+    } else if(q.type === 'rating'){
+      const rawIcon = q.ratingIcon || 'star';
+      hoverStars(q.id, val, rawIcon);
+      const lbl = document.getElementById(`ratingLabel-${q.id}`);
+      if(lbl) lbl.textContent = `Selected: ${val}`;
+    } else if(q.type === 'file_upload'){
+      renderFileList(q.id);
+    } else if(['multiple_choice_grid', 'checkbox_grid'].includes(q.type) && typeof val === 'object'){
+      const cols = q.columns || [];
+      Object.entries(val).forEach(([ri, colV]) => {
+        if(q.type === 'multiple_choice_grid'){
+          const ci = cols.indexOf(colV);
+          if(ci !== -1){
+            const rInp = document.getElementById(`grid-${q.id}-${ri}-${ci}`);
+            if(rInp) rInp.checked = true;
+          }
+        } else if(Array.isArray(colV)){
+          colV.forEach(cv => {
+            const ci = cols.indexOf(cv);
+            if(ci !== -1){
+              const cbInp = document.getElementById(`grid-${q.id}-${ri}-${ci}`);
+              if(cbInp) cbInp.checked = true;
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
+// =========================================================
+//  SECTION NAVIGATION ACTIONS
+// =========================================================
+function nextSection(){
+  if(!validateCurrentSection()){
+    toast('Please fill in all required fields in this step','error');
+    return;
+  }
+  if(curSectionIdx < formSections.length - 1){
+    curSectionIdx++;
+    renderCurrentSection();
+  }
+}
+
+function prevSection(){
+  if(curSectionIdx > 0){
+    curSectionIdx--;
+    renderCurrentSection();
+  }
+}
+
+function shuffleArr(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress(){
+  const f=formDef; if(!f||!f.settings?.progressBar) return;
+  const total=(f.questions||[]).filter(q=>!['section','image','section_title'].includes(q.type)).length;
+  const answered=Object.keys(answers).filter(k=>{
+    const v=answers[k];
+    return v!==null&&v!==undefined&&v!==''&&!(Array.isArray(v)&&v.length===0);
+  }).length;
+  const pct=total?Math.round(answered/total*100):0;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`${answered} of ${total} answered`;
+}
+
+// =========================================================
+//  RENDER QUESTION
+// =========================================================
+function renderQ(q,idx){
+  const wrap=document.createElement('div');
+  if(q.type==='section'||q.type==='section_title'){
+    wrap.className='section-card';
+    wrap.innerHTML=`<div class="section-title">${esc(q.title||'')}</div>
+      ${q.description?`<div class="section-desc">${esc(q.description)}</div>`:''}`;
+    return wrap;
+  }
+  if(q.type==='image'){
+    wrap.innerHTML=`<div class="q-card" style="padding:12px;text-align:center">
+      <img src="${q.imageData}" style="max-width:100%;border-radius:10px" alt="${esc(q.imageAlt||'')}">
+    </div>`;
+    return wrap;
+  }
+  wrap.className='q-card';
+  wrap.id='qcard-'+q.id;
+  const reqStar=q.required?`<span class="req">*</span>`:'';
+  wrap.innerHTML=`
+    <div class="q-label">${esc(q.title||'Untitled Question')}${reqStar}</div>
+    ${q.description?`<div class="q-desc">${esc(q.description)}</div>`:''}
+    ${q.imageData?`<img src="${q.imageData}" class="q-img" alt="${esc(q.imageAlt||'')}">` :''}
+    <div id="qcontent-${q.id}">${renderQContent(q)}</div>
+    <div class="q-error" id="qerr-${q.id}">
+      <span class="material-icons-round">error</span>
+      <span id="qerrmsg-${q.id}">This is a required question.</span>
+    </div>`;
+  return wrap;
+}
+
+function renderQContent(q){
+  switch(q.type){
+    case 'short_answer':
+      return `<input type="text" class="text-inp" id="ans-${q.id}"
+        placeholder="Your answer"
+        oninput="setAns('${q.id}',this.value)" autocomplete="off">`;
+    case 'paragraph':
+      return `<textarea class="para-inp" id="ans-${q.id}"
+        placeholder="Your answer"
+        oninput="setAns('${q.id}',this.value)"></textarea>`;
+    case 'multiple_choice':
+      return renderMCContent(q);
+    case 'checkboxes':
+      return renderCBContent(q);
+    case 'dropdown':
+      return renderDDContent(q);
+    case 'linear_scale':
+      return renderScaleContent(q);
+    case 'rating':
+      return renderRatingContent(q);
+    case 'file_upload':
+      return renderFileContent(q);
+    case 'multiple_choice_grid':
+      return renderGridContent(q,'radio');
+    case 'checkbox_grid':
+      return renderGridContent(q,'checkbox');
+    case 'date':
+      return `<input type="date" class="date-inp" id="ans-${q.id}"
+        onchange="setAns('${q.id}',this.value)">`;
+    case 'time':
+      return `<input type="time" class="date-inp" id="ans-${q.id}"
+        onchange="setAns('${q.id}',this.value)">`;
+    default:
+      return `<input type="text" class="text-inp" id="ans-${q.id}"
+        placeholder="Your answer" oninput="setAns('${q.id}',this.value)">`;
+  }
+}
+
+function renderMCContent(q){
+  const opts=[...(q.options||[])];
+  if(q.hasOther) opts.push('__other__');
+  return opts.map(opt=>{
+    if(opt==='__other__'){
+      return `<div class="opt-item" onclick="selectMC('${q.id}','__other__',this)">
+        <input type="radio" name="mc-${q.id}" value="__other__" id="mc-${q.id}-other">
+        <label for="mc-${q.id}-other" style="cursor:pointer">Other:</label>
+        <input type="text" class="other-text-inp" id="mc-other-${q.id}"
+               placeholder="Please specify"
+               oninput="setMCOther('${q.id}',this.value)"
+               onclick="event.stopPropagation()">
+      </div>`;
+    }
+    return `<div class="opt-item" onclick="selectMC('${q.id}','${esc(opt)}',this)">
+      <input type="radio" name="mc-${q.id}" value="${esc(opt)}" id="mc-${q.id}-${esc(opt)}">
+      <label for="mc-${q.id}-${esc(opt)}" style="cursor:pointer">${esc(opt)}</label>
+    </div>`;
+  }).join('');
+}
+
+function renderCBContent(q){
+  const opts=[...(q.options||[])];
+  if(q.hasOther) opts.push('__other__');
+  return opts.map((opt,i)=>{
+    if(opt==='__other__'){
+      return `<div class="opt-item">
+        <input type="checkbox" id="cb-${q.id}-other" onchange="toggleCB('${q.id}','__other__',this.checked,null)">
+        <label for="cb-${q.id}-other" style="cursor:pointer">Other:</label>
+        <input type="text" class="other-text-inp" id="cb-other-${q.id}"
+               placeholder="Please specify"
+               oninput="setCBOther('${q.id}',this.value)">
+      </div>`;
+    }
+    return `<div class="opt-item">
+      <input type="checkbox" id="cb-${q.id}-${i}" value="${esc(opt)}"
+             onchange="toggleCB('${q.id}','${esc(opt)}',this.checked,'${esc(opt)}')">
+      <label for="cb-${q.id}-${i}" style="cursor:pointer">${esc(opt)}</label>
+    </div>`;
+  }).join('');
+}
+
+function renderDDContent(q){
+  let opts=`<option value="">-- Select an option --</option>`;
+  (q.options||[]).forEach(opt=>{
+    opts+=`<option value="${esc(opt)}">${esc(opt)}</option>`;
+  });
+  return `<select class="sel-inp" id="ans-${q.id}" onchange="setAns('${q.id}',this.value)">
+    ${opts}
+  </select>`;
+}
+
+function renderScaleContent(q){
+  const min=q.scaleMin||1, max=q.scaleMax||5;
+  let cols='';
+  for(let i=min;i<=max;i++){
+    const isMin=i===min, isMax=i===max;
+    const lbl=isMin&&q.scaleMinLabel?q.scaleMinLabel:isMax&&q.scaleMaxLabel?q.scaleMaxLabel:'';
+    cols+=`<div class="scale-col" onclick="selectScale('${q.id}',${i},this)">
+      <input type="radio" name="scale-${q.id}" value="${i}" id="scale-${q.id}-${i}">
+      <span>${i}</span>
+      ${lbl?`<label for="scale-${q.id}-${i}">${esc(lbl)}</label>`:'<label></label>'}
+    </div>`;
+  }
+  return `<div class="scale-wrap"><div class="scale-grid">${cols}</div></div>`;
+}
+
+function getRatingIconName(type, isFilled){
+  if(type==='heart') return isFilled ? 'favorite' : 'favorite_border';
+  if(type==='thumb') return isFilled ? 'thumb_up' : 'thumb_up_off_alt';
+  return isFilled ? 'star' : 'star_border';
+}
+
+function renderRatingContent(q){
+  const max=q.ratingMax||5;
+  const rawIcon=q.ratingIcon||'star';
+  let stars='';
+  for(let i=1;i<=max;i++){
+    stars+=`<button type="button" class="star-btn ${rawIcon}" id="star-${q.id}-${i}"
+      data-val="${i}" data-qid="${q.id}"
+      onmouseover="hoverStars('${q.id}',${i},'${rawIcon}')"
+      onmouseout="unhoverStars('${q.id}','${rawIcon}')"
+      onclick="selectRating('${q.id}',${i},'${rawIcon}')">
+      <span class="material-icons-round">${getRatingIconName(rawIcon, false)}</span>
+    </button>`;
+  }
+  return `<div class="stars-wrap" id="stars-${q.id}">${stars}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px" id="ratingLabel-${q.id}"></div>`;
+}
+
+const FILE_TYPES_CONFIG = {
+  document: { label: 'Document', exts: ['pdf','doc','docx','txt','odt'], mime: '.pdf,.doc,.docx,.txt,.odt' },
+  spreadsheet: { label: 'Spreadsheet', exts: ['xls','xlsx','csv','ods'], mime: '.xls,.xlsx,.csv,.ods' },
+  presentation: { label: 'Presentation', exts: ['ppt','pptx','odp'], mime: '.ppt,.pptx,.odp' },
+  image: { label: 'Image', exts: ['png','jpg','jpeg','gif','webp','svg'], mime: '.png,.jpg,.jpeg,.gif,.webp,.svg,image/*' },
+  video: { label: 'Video', exts: ['mp4','mov','avi','mkv','webm'], mime: '.mp4,.mov,.avi,.mkv,.webm,video/*' },
+  audio: { label: 'Audio', exts: ['mp3','wav','m4a','ogg'], mime: '.mp3,.wav,.m4a,.ogg,audio/*' },
+  pdf: { label: 'PDF only', exts: ['pdf'], mime: '.pdf,application/pdf' },
+  zip: { label: 'Archive/Zip', exts: ['zip','rar','7z','tar','gz'], mime: '.zip,.rar,.7z,.tar,.gz' }
+};
+
+function renderFileContent(q){
+  const maxFiles=q.maxFiles||1, maxMB=q.maxSizeMB||10;
+  let typeNote = '';
+  let acceptAttr = '*/*';
+
+  if(q.specificTypes && q.allowedTypes && q.allowedTypes.length > 0){
+    const labels = q.allowedTypes.map(t => FILE_TYPES_CONFIG[t]?.label || t);
+    const mimes = q.allowedTypes.map(t => FILE_TYPES_CONFIG[t]?.mime || '').filter(Boolean);
+    acceptAttr = mimes.join(',');
+    typeNote = `<span style="display:block;margin-top:3px;color:var(--accent)">Supported: ${labels.join(', ')}</span>`;
+  }
+
+  return `<div class="file-drop-zone" id="dropzone-${q.id}"
+    ondragover="event.preventDefault();this.classList.add('drag')"
+    ondragleave="this.classList.remove('drag')"
+    ondrop="handleFileDrop(event,'${q.id}')">
+    <span class="material-icons-round">cloud_upload</span>
+    <p>Drag & drop files here, or click to browse</p>
+    <p style="font-size:11px;color:var(--muted)">Max ${maxFiles} file${maxFiles>1?'s':''} · Max ${maxMB}MB each${typeNote}</p>
+    <button type="button" class="file-btn" onclick="openFilePicker('${q.id}',${maxFiles},${maxMB},'${esc(acceptAttr)}')">
+      <span class="material-icons-round">folder_open</span> Choose files
+    </button>
+  </div>
+  <div class="file-list" id="filelist-${q.id}"></div>
+  <div class="file-upload-status" id="filestatus-${q.id}"></div>`;
+}
+
+function renderGridContent(q,inputType){
+  const rows=q.rows||['Row 1'], cols=q.columns||['Column 1'];
+  let html=`<div style="overflow-x:auto"><table class="grid-table"><tr><th></th>`;
+  cols.forEach(c=>html+=`<th>${esc(c)}</th>`);
+  html+=`</tr>`;
+  rows.forEach((r,ri)=>{
+    html+=`<tr><td>${esc(r)}</td>`;
+    cols.forEach((c,ci)=>{
+      const name=inputType==='radio'?`grid-${q.id}-${ri}`:`grid-${q.id}-${ri}-${ci}`;
+      const id=`grid-${q.id}-${ri}-${ci}`;
+      html+=`<td><input type="${inputType}" name="${name}" id="${id}" value="${esc(c)}"
+        onchange="setGridAns('${q.id}',${ri},'${esc(c)}','${inputType}')"></td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</table></div>`;
+  return html;
+}
+
+// =========================================================
+//  ANSWER SETTERS
+// =========================================================
+function setAns(qId,val){
+  answers[qId]=val;
+  clearError(qId);
+  updateProgress();
+}
+
+function selectMC(qId,val,el){
+  answers[qId]=val;
+  const card=document.getElementById('qcard-'+qId);
+  card?.querySelectorAll('.opt-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type=radio]').checked=true;
+  if(val==='__other__'){
+    const otherInp=document.getElementById('mc-other-'+qId);
+    otherInp?.focus();
+    answers[qId]=otherInp?.value?'Other: '+otherInp.value:'Other: ';
+  }
+  clearError(qId); updateProgress();
+}
+
+function setMCOther(qId,val){
+  answers[qId]='Other: '+val;
+  answers['__other__'+qId]=val;
+  clearError(qId); updateProgress();
+}
+
+function toggleCB(qId,opt,isChecked,origVal){
+  if(!Array.isArray(answers[qId])) answers[qId]=[];
+  if(opt==='__other__'){
+    const oVal=document.getElementById(`cb-other-${qId}`)?.value||'';
+    if(isChecked){
+      answers[qId]=answers[qId].filter(v=>!v.startsWith('__OTHER__:'));
+      answers[qId].push('__OTHER__:'+oVal);
+    } else {
+      answers[qId]=answers[qId].filter(v=>!v.startsWith('__OTHER__:'));
+    }
+  } else {
+    if(isChecked){
+      if(!answers[qId].includes(origVal)) answers[qId].push(origVal);
+    } else {
+      answers[qId]=answers[qId].filter(v=>v!==origVal);
+    }
+  }
+  clearError(qId); updateProgress();
+}
+
+function setCBOther(qId,val){
+  if(!Array.isArray(answers[qId])) answers[qId]=[];
+  const filtered=answers[qId].filter(v=>!v.startsWith('__OTHER__:'));
+  const isChecked=document.getElementById(`cb-${qId}-other`)?.checked;
+  if(isChecked) filtered.push('__OTHER__:'+val);
+  answers[qId]=filtered;
+  updateProgress();
+}
+
+function selectScale(qId,val,colEl){
+  answers[qId]=val;
+  document.querySelector(`#scale-${qId}-${val}`)?.click();
+  clearError(qId); updateProgress();
+}
+
+function hoverStars(qId,val,rawIcon){
+  const max=formDef.questions.find(q=>q.id===qId)?.ratingMax||5;
+  for(let i=1;i<=max;i++){
+    const btn=document.getElementById(`star-${qId}-${i}`);
+    if(btn){
+      const isFilled = i<=val;
+      btn.classList.toggle('active', isFilled);
+      const mi=btn.querySelector('.material-icons-round');
+      if(mi) mi.textContent = getRatingIconName(rawIcon, isFilled);
+    }
+  }
+}
+
+function unhoverStars(qId,rawIcon){
+  const cur=answers[qId]||0;
+  hoverStars(qId,cur,rawIcon);
+}
+
+function selectRating(qId,val,rawIcon){
+  answers[qId]=val;
+  hoverStars(qId,val,rawIcon);
+  const lbl=document.getElementById(`ratingLabel-${qId}`);
+  if(lbl) lbl.textContent=`Selected: ${val}`;
+  clearError(qId); updateProgress();
+}
+
+function setGridAns(qId,rowIdx,colVal,inputType){
+  if(!answers[qId]) answers[qId]={};
+  if(inputType==='radio'){
+    answers[qId][rowIdx]=colVal;
+  } else {
+    if(!Array.isArray(answers[qId][rowIdx])) answers[qId][rowIdx]=[];
+    const arr=answers[qId][rowIdx];
+    const exists=arr.indexOf(colVal);
+    if(exists===-1) arr.push(colVal); else arr.splice(exists,1);
+  }
+  clearError(qId); updateProgress();
+}
+
+// =========================================================
+//  FILE UPLOAD
+// =========================================================
+function openFilePicker(qId,maxFiles,maxMB,acceptStr){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.multiple=maxFiles>1;
+  if(acceptStr && acceptStr !== '*/*') inp.accept = acceptStr;
+  inp.onchange=e=>handleFiles(qId,Array.from(e.target.files),maxFiles,maxMB);
+  inp.click();
+}
+
+function handleFileDrop(e,qId){
+  e.preventDefault();
+  const dz=document.getElementById('dropzone-'+qId);
+  dz?.classList.remove('drag');
+  const q=formDef.questions.find(q=>q.id===qId);
+  const maxFiles=q?.maxFiles||1, maxMB=q?.maxSizeMB||10;
+  handleFiles(qId,Array.from(e.dataTransfer.files),maxFiles,maxMB);
+}
+
+function handleFiles(qId,files,maxFiles,maxMB){
+  const q=formDef.questions.find(q=>q.id===qId);
+  if(!fileUploads[qId]) fileUploads[qId]=[];
+  const existing=fileUploads[qId].length;
+  const allowed=maxFiles-existing;
+  if(allowed<=0){ toast(`Max ${maxFiles} file${maxFiles>1?'s':''} allowed`,'error'); return; }
+  const toAdd=files.slice(0,allowed);
+  const maxBytes=maxMB*1024*1024;
+
+  // Validate allowed file types
+  if(q?.specificTypes && q?.allowedTypes && q.allowedTypes.length > 0){
+    const allowedExts=[];
+    q.allowedTypes.forEach(t=>{
+      const ex = FILE_TYPES_CONFIG[t]?.exts || [];
+      allowedExts.push(...ex);
+    });
+    for(const file of toAdd){
+      const ext = (file.name.split('.').pop()||'').toLowerCase();
+      if(!allowedExts.includes(ext)){
+        const labels = q.allowedTypes.map(t=>FILE_TYPES_CONFIG[t]?.label||t).join(', ');
+        toast(`"${file.name}" is not an accepted format. Allowed: ${labels}`,'error',4500);
+        return;
+      }
+    }
+  }
+
+  toAdd.forEach(file=>{
+    if(file.size>maxBytes){ toast(`${file.name} exceeds ${maxMB}MB limit`,'error'); return; }
+    fileUploads[qId].push({file,url:null,name:file.name,size:file.size,status:'pending'});
+  });
+  renderFileList(qId);
+  toast(`${toAdd.length} file${toAdd.length>1?'s':''} added. Files will upload on submit.`,'info');
+}
+
+function renderFileList(qId){
+  const list=document.getElementById('filelist-'+qId);
+  if(!list) return;
+  const files=fileUploads[qId]||[];
+  list.innerHTML=files.map((f,i)=>`
+    <div class="file-item" id="fitem-${qId}-${i}">
+      <span class="material-icons-round">${getFileIcon(f.name)}</span>
+      <span class="file-item-name" title="${esc(f.name)}">${esc(f.name)}</span>
+      <span class="file-item-size">${fmtSize(f.size)}</span>
+      ${f.status==='done'?'<span class="material-icons-round" style="color:var(--success);font-size:18px">check_circle</span>':
+        f.status==='uploading'?'<span class="spinner" style="width:16px;height:16px;border-width:2px"></span>':
+        `<button class="file-item-del" onclick="removeFile('${qId}',${i})"><span class="material-icons-round">close</span></button>`}
+    </div>`).join('');
+  // Update answers with file names (urls filled after upload)
+  if(files.length>0){
+    answers[qId]=files.map(f=>f.url||f.name);
+    clearError(qId); updateProgress();
+  } else {
+    delete answers[qId];
+  }
+}
+
+function getFileIcon(name){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  if(['jpg','jpeg','png','gif','webp','svg'].includes(ext)) return 'image';
+  if(['pdf'].includes(ext)) return 'picture_as_pdf';
+  if(['doc','docx'].includes(ext)) return 'description';
+  if(['xls','xlsx'].includes(ext)) return 'table_chart';
+  if(['mp4','mov','avi'].includes(ext)) return 'videocam';
+  if(['mp3','wav'].includes(ext)) return 'audio_file';
+  if(['zip','rar','7z'].includes(ext)) return 'folder_zip';
+  return 'attach_file';
+}
+
+function removeFile(qId,idx){
+  if(fileUploads[qId]) fileUploads[qId].splice(idx,1);
+  renderFileList(qId);
+  if(!fileUploads[qId]||!fileUploads[qId].length) delete answers[qId];
+  updateProgress();
+}
+
+async function uploadAllFiles(){
+  if(!GAS_URL){
+    toast('Apps Script URL is not configured. Please configure it in settings.','error');
+    return {allOk: false};
+  }
+  const f=formDef;
+  let allOk=true;
+  for(const qId of Object.keys(fileUploads)){
+    const q=f.questions.find(q=>q.id===qId);
+    const files=fileUploads[qId]||[];
+    const uploadedUrls=[];
+    for(let i=0;i<files.length;i++){
+      const fObj=files[i];
+      if(fObj.url){ uploadedUrls.push(fObj.url); continue; }
+      fObj.status='uploading';
+      renderFileList(qId);
+      try{
+        const b64=await fileToBase64(fObj.file);
+        const result=await gasPost({
+          action:'uploadFile',
+          formId:f.id,
+          formTitle:f.title||f.id,
+          questionId:qId,
+          questionTitle:q?.title||qId,
+          fileName:fObj.name,
+          fileData:b64.split(',')[1], // remove base64 header
+          mimeType:fObj.file.type||'application/octet-stream',
+          responseId:tempResId
+        });
+        if(result.success && (result.viewUrl || result.fileUrl)){
+          const directUrl = result.viewUrl || result.fileUrl;
+          fObj.url = directUrl;
+          fObj.status = 'done';
+          uploadedUrls.push(directUrl);
+        } else {
+          fObj.status = 'error'; allOk = false;
+          toast(`Failed to upload ${fObj.name}: ${result.error || 'Server error'}`, 'error');
+        }
+      } catch(e){
+        fObj.status = 'error'; allOk = false;
+        toast(`Upload error on ${fObj.name}: ${e.message}`, 'error');
+      }
+      renderFileList(qId);
+    }
+    const finalUrls = (fileUploads[qId] || []).map(f => f.url).filter(Boolean);
+    if(finalUrls.length > 0) answers[qId] = finalUrls.join(', ');
+  }
+  return {allOk};
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// =========================================================
+//  VALIDATION
+// =========================================================
+function validateCurrentSection(){
+  const sec = formSections[curSectionIdx];
+  if(!sec) return true;
+  let valid = true;
+
+  if(curSectionIdx === 0 && formDef.settings?.collectEmail){
+    const email = document.getElementById('emailInput')?.value || '';
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      document.getElementById('emailError')?.classList.add('show');
+      document.getElementById('emailInput')?.classList.add('error');
+      valid = false;
+    }
+  }
+
+  (sec.questions || []).forEach(q => {
+    if(['section','image','section_title'].includes(q.type)) return;
+    if(!q.required) return;
+    const ans = answers[q.id];
+    let ok = false;
+    if(q.type === 'checkboxes'){
+      ok = Array.isArray(ans) && ans.length > 0;
+    } else if(q.type === 'file_upload'){
+      ok = !!ans || (fileUploads[q.id] && fileUploads[q.id].length > 0);
+    } else if(q.type === 'multiple_choice_grid' || q.type === 'checkbox_grid'){
+      const rows = q.rows || [];
+      ok = !!ans && rows.every((_, ri) => {
+        const v = ans[ri];
+        return v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true);
+      });
+    } else {
+      ok = ans !== null && ans !== undefined && String(ans).trim() !== '';
+    }
+    if(!ok){
+      showError_q(q.id, 'This is a required question.');
+      valid = false;
+    }
+  });
+
+  return valid;
+}
+
+function validate(){
+  let valid = true;
+  const f = formDef;
+
+  // Validate email if enabled
+  if(f.settings?.collectEmail){
+    const email = document.getElementById('emailInput')?.value || '';
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      curSectionIdx = 0;
+      renderCurrentSection();
+      document.getElementById('emailError')?.classList.add('show');
+      document.getElementById('emailInput')?.classList.add('error');
+      return false;
+    }
+  }
+
+  // Validate all sections
+  for(let sIdx = 0; sIdx < formSections.length; sIdx++){
+    const sec = formSections[sIdx];
+    let secValid = true;
+    (sec.questions || []).forEach(q => {
+      if(['section','image','section_title'].includes(q.type)) return;
+      if(!q.required) return;
+      const ans = answers[q.id];
+      let ok = false;
+      if(q.type === 'checkboxes'){
+        ok = Array.isArray(ans) && ans.length > 0;
+      } else if(q.type === 'file_upload'){
+        ok = !!ans || (fileUploads[q.id] && fileUploads[q.id].length > 0);
+      } else if(q.type === 'multiple_choice_grid' || q.type === 'checkbox_grid'){
+        const rows = q.rows || [];
+        ok = !!ans && rows.every((_, ri) => {
+          const v = ans[ri];
+          return v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true);
+        });
+      } else {
+        ok = ans !== null && ans !== undefined && String(ans).trim() !== '';
+      }
+      if(!ok){
+        secValid = false;
+        valid = false;
+      }
+    });
+
+    if(!secValid){
+      curSectionIdx = sIdx;
+      renderCurrentSection();
+      (sec.questions || []).forEach(q => {
+        if(!q.required) return;
+        const ans = answers[q.id];
+        let ok = false;
+        if(q.type === 'checkboxes') ok = Array.isArray(ans) && ans.length > 0;
+        else if(q.type === 'file_upload') ok = !!ans || (fileUploads[q.id] && fileUploads[q.id].length > 0);
+        else if(q.type === 'multiple_choice_grid' || q.type === 'checkbox_grid'){
+          const rows = q.rows || [];
+          ok = !!ans && rows.every((_, ri) => { const v = ans[ri]; return v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true); });
+        } else ok = ans !== null && ans !== undefined && String(ans).trim() !== '';
+        if(!ok) showError_q(q.id, 'This is a required question.');
+      });
+      return false;
+    }
+  }
+
+  return valid;
+}
+
+function showError_q(qId,msg){
+  const err=document.getElementById('qerr-'+qId);
+  const msgEl=document.getElementById('qerrmsg-'+qId);
+  if(err){ err.classList.add('show'); }
+  if(msgEl) msgEl.textContent=msg;
+  const card=document.getElementById('qcard-'+qId);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function clearError(qId){
+  document.getElementById('qerr-'+qId)?.classList.remove('show');
+  document.getElementById('ans-'+qId)?.classList.remove('error');
+}
+
+// =========================================================
+//  SUBMIT
+// =========================================================
+async function submitForm(){
+  if(!validate()){
+    toast('Please fill in all required fields','error');
+    return;
+  }
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.innerHTML=`<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Submitting...`;
+
+  const f=formDef;
+
+  // Upload files to Google Drive first
+  const hasFiles = Object.keys(fileUploads).some(k => fileUploads[k] && fileUploads[k].length > 0);
+  if(hasFiles){
+    toast('Uploading files to Google Drive...','info',10000);
+    const upRes = await uploadAllFiles();
+    if(!upRes.allOk){
+      btn.disabled=false;
+      btn.innerHTML=`<span class="material-icons-round">send</span> Submit`;
+      toast('One or more files could not be uploaded to Google Drive. Please retry.','error');
+      return;
+    }
+    toast('Files uploaded to Google Drive!','success');
+  }
+
+  // Build clean response payload
+  const cleanAnswers={};
+  (f.questions||[]).forEach(q=>{
+    if(['section','image','section_title'].includes(q.type)) return;
+    let ans=answers[q.id];
+    if(q.type==='file_upload'){
+      if(fileUploads[q.id] && fileUploads[q.id].length > 0){
+        const driveUrls = fileUploads[q.id].map(f => f.url).filter(Boolean);
+        ans = driveUrls.join(', ');
+      }
+    } else if(q.type==='checkboxes'&&Array.isArray(ans)){
+      ans=ans.map(v=>v.startsWith('__OTHER__:')?v.replace('__OTHER__:','Other: '):v).join(', ');
+    } else if(q.type==='multiple_choice'&&ans==='__other__'){
+      ans=answers['__other__'+q.id]||'';
+    } else if(typeof ans==='object'&&ans!==null&&!Array.isArray(ans)){
+      const rows=q.rows||[];
+      ans=rows.map((r,ri)=>{
+        const v=ans[ri];
+        return `${r}: ${Array.isArray(v)?v.join(', '):v||''}`;
+      }).join(' | ');
+    }
+    cleanAnswers[q.id]=ans||'';
+  });
+
+  // Extract respondent email
+  let respondentEmail = f.settings?.collectEmail
+    ? (document.getElementById('emailInput')?.value || null)
+    : null;
+  if(!respondentEmail){
+    const emailQ=f.questions?.find(q=>q.id==='EMAIL_LOCKED'||q.locked);
+    if(emailQ) respondentEmail=String(cleanAnswers[emailQ.id]||'').trim()||null;
+  }
+  if(!respondentEmail){
+    Object.values(cleanAnswers).forEach(v=>{
+      if(!respondentEmail&&typeof v==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()))
+        respondentEmail=v.trim();
+    });
+  }
+
+  if(!GAS_URL){
+    // Local mode: just show thank you
+    toast('Response recorded locally (no cloud sync).','info');
+    showThankYou();
+    return;
+  }
+
+  try{
+    const result=await gasPost({
+      action:'submitResponse',
+      formId:f.id,
+      formTitle:f.title||f.id,
+      questions:f.questions.filter(q=>!['section','image','section_title'].includes(q.type)),
+      responses:cleanAnswers,
+      respondentEmail,
+      responseId:tempResId,
+      confirmMsg:f.settings?.confirmMsg||'Your response has been recorded.'
+    });
+
+    if(result.success){
+      showThankYou(result.sheetUrl);
+    } else {
+      toast('Submission failed: '+(result.error||'Unknown error'),'error');
+      btn.disabled=false;
+      btn.innerHTML=`<span class="material-icons-round">send</span> Submit`;
+    }
+  } catch(e){
+    toast('Network error. Please try again.','error');
+    btn.disabled=false;
+    btn.innerHTML=`<span class="material-icons-round">send</span> Submit`;
+  }
+}
+
+function showThankYou(sheetUrl){
+  document.getElementById('formView').classList.add('hidden');
+  document.getElementById('thankYou').style.display='block';
+  document.getElementById('tyMsg').textContent=
+    formDef?.settings?.confirmMsg||'Your response has been recorded.';
+  // Show/hide submit another
+  const anotherBtn=document.getElementById('submitAnotherBtn');
+  if(formDef?.settings?.anotherResp===false){
+    anotherBtn.style.display='none';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetForm(){
+  answers={}; fileUploads={}; tempResId='RES'+uid(12).toUpperCase();
+  curSectionIdx=0;
+  document.getElementById('thankYou').style.display='none';
+  document.getElementById('formView').classList.remove('hidden');
+  renderForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function clearForm(){
+  if(!confirm('Clear all your answers?')) return;
+  answers={}; fileUploads={};
+  curSectionIdx=0;
+  renderForm();
+  toast('Form cleared','info');
+}
+
+// =========================================================
+//  GAS API
+// =========================================================
+async function gasPost(data){
+  if(!GAS_URL) throw new Error('GAS URL not configured');
+  const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(data),redirect:'follow'});
+  return r.json();
+}
+async function gasGet(params){
+  if(!GAS_URL) throw new Error('GAS URL not configured');
+  const url=new URL(GAS_URL);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const r=await fetch(url.toString(),{redirect:'follow'});
+  return r.json();
+}
+
+init();
+</script>
+</body>
+</html>

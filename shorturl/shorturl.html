@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="sedsb.png" type="image/png">
+    <title>Shortener URL Creator</title>
+    <meta name="author" content="Manikandan N">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kumaraguruseds.space/">
+  <meta property="og:title" content="Kumaraguru SEDS">
+  <meta property="og:description" content="Kumaraguru SEDS is a student-driven chapter dedicated to space exploration, astronomy, and aerospace innovation. We conduct hands-on workshops, stargazing sessions, and technical projects to inspire curiosity and scientific learning. Our mission is to empower young minds to explore the universe and contribute to the advancement of space science and technology.">
+  <meta property="og:image" content="https://kumaraguruseds.space/sedsb.png">
+  <link rel="icon" href="sedsb.png" type="image/png">
+<style>
+        :root{
+            --sidebar-bg: #132233;
+            --text: #fff;
+            --muted: #c9d1e6;
+            --card: rgba(255,255,255,0.15); 
+            --accent: #4da6ff;
+            --section-title: #4da6ff;
+            --success-color: #38c172; 
+            --error-color: #e3342f; 
+            --warning-color: #ffc107; 
+            --input-bg: rgba(255,255,255,0.25); 
+            --input-border: #888; 
+            --loading-text-color: #fff;
+            --validation-available: var(--success-color);
+            --validation-taken: var(--error-color);
+        }
+        *{box-sizing:border-box; margin:0; padding:0; scroll-behavior:smooth;}
+        body{
+            font-family:"Poppins", sans-serif;
+            color:var(--text);
+            min-height:100vh;
+            position:relative;
+            z-index:0;
+        }
+
+        /* Background with dark overlay */
+        body::before {
+            content:"";
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background: url('background.jpg') no-repeat center center/cover fixed;
+            filter:brightness(55%); 
+            z-index:-1;
+        }
+
+        header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:10px 20px;
+            background:rgba(0,0,0,0.5);
+            position:sticky;
+            top:0;
+            z-index:1000;
+        }
+
+        .left-header {
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+
+        header img{
+            height:60px;
+            transition:0.3s;
+        }
+
+        header .seds-logo {
+            height:70px;
+        }
+
+        .events-title {
+            margin-top:8px;
+            font-size:50px;
+            color: #FFFF;
+            text-align:center;
+        }
+       /* Stars */
+       .stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none; /* Prevents interaction with stars */
+}
+
+.star {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    from {
+        transform: translateY(-20px);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+        /* Sidebar Navigation (Kept unchanged) */
+        .sidebar{
+            position:fixed;
+            top:0; left:-260px;
+            width:260px;
+            height:100%;
+            background:var(--sidebar-bg);
+            padding:30px 20px;
+            transition:0.3s;
+            z-index:2000;
+            overflow-y:auto; 
+            max-height:100vh; 
+        }
+        .sidebar.active{left:0;}
+        .sidebar a{
+            display:block;
+            padding:15px 0;
+            color:#fff;
+            font-size:20px;
+            text-decoration:none;
+            border-bottom:1px solid rgba(255,255,255,0.2);
+        }
+        .sidebar a:hover{color:var(--accent);}
+        .close-btn{
+            font-size:22px;
+            color:#fff;
+            cursor:pointer;
+            text-align:right;
+            margin-bottom:20px;
+            display:block;
+        }
+
+        .hamburger{
+            font-size:28px;
+            cursor:pointer;
+            color:white;
+        }
+
+        .section{
+            margin:40px auto;
+            padding:35px; 
+            max-width:800px; 
+            background:var(--card);
+            border-radius:16px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.6); 
+            opacity:0;
+            transform:translateY(40px);
+            transition:all 0.8s ease-out;
+        }
+        .section.show{
+            opacity:1;
+            transform:translateY(0);
+        }
+        .section h1,
+        .contact h2 {
+            font-size:32px; 
+            margin-bottom:14px;
+            text-align:center;
+            color:var(--section-title);
+            text-shadow: 0 0 5px rgba(77, 166, 255, 0.5); 
+        }
+
+        .section p {
+            font-size:16px;
+            color:var(--muted);
+            text-align:center; 
+            margin-bottom: 20px;
+        }
+        
+        /* URL Shortener Specific Styles - HIGH CONTRAST */
+        #shortenerForm label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: var(--text); 
+            font-weight: 600;
+        }
+        input[type="text"], input[type="url"], input[type="email"] { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 5px 0 0 0; 
+            border: 2px solid var(--input-border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            background-color: var(--input-bg); 
+            color: var(--text); 
+            font-size: 18px; 
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input::placeholder {
+            color: var(--muted);
+            opacity: 1; 
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(77, 166, 255, 0.8);
+            background-color: rgba(255,255,255,0.35); 
+        }
+        
+        /* Validation Status Messages */
+        .validation-message {
+            font-size: 0.9em;
+            padding: 5px 0 15px 0;
+            display: block;
+            text-align: left;
+            min-height: 25px; 
+        }
+        .validation-message.available {
+            color: var(--validation-available);
+        }
+        .validation-message.taken, .validation-message.invalid {
+            color: var(--validation-taken);
+        }
+        .validation-message.checking {
+            color: var(--warning-color);
+        }
+        
+        /* Short Code Constraint Text (Visible instruction) */
+        #slugConstraint {
+            font-size: 0.85em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        #submitBtn { 
+            background-color: var(--accent); 
+            color: #000; 
+            padding: 15px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            width: 100%; 
+            font-size: 18px;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s;
+            letter-spacing: 1px;
+        }
+        #submitBtn:hover:not(:disabled) { 
+            background-color: #a4ccff; 
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(77, 166, 255, 0.5);
+        }
+        #submitBtn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Primary Output Area for Latest Result/Loading */
+        #output { 
+            margin-top: 30px; 
+            padding: 25px; 
+            border-radius: 12px; 
+            word-wrap: break-word; 
+            border: 2px solid transparent; 
+            text-align: center;
+            font-size: 17px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease-out;
+            font-weight: 500;
+        }
+
+        .success { 
+            background-color: rgba(56, 193, 114, 0.2); 
+            border-color: var(--success-color); 
+            color: var(--text); 
+        }
+        .error { 
+            background-color: rgba(227, 52, 47, 0.2); 
+            border-color: var(--error-color); 
+            color: var(--text); 
+        }
+        
+        /* High-Contrast Loading State */
+        .loading {
+            border-color: var(--warning-color); 
+            color: var(--text);
+            font-weight: 700;
+            background-color: var(--sidebar-bg); 
+            padding: 25px; 
+            overflow: hidden;
+        }
+
+        /* Loading Area Container */
+        #loadingArea {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0;
+        }
+        
+        /* Container for the text messages (now a separate, clean box) */
+        #conversionDisplay {
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0 20px 0; 
+        }
+        
+        .loading-message-box {
+            background-color: #fff; /* Solid White Background */
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+            width: 100%;
+            max-width: 90%;
+            box-shadow: 0 0 15px rgba(77, 166, 255, 0.5);
+            transition: all 0.5s ease-in-out;
+            opacity: 0; /* Starts hidden for animation */
+        }
+
+        /* Loading GIF Container (Larger and White) */
+        .loading-gif-container {
+            width: 300px; 
+            height: 300px;
+            background-color: white; 
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            padding: 0; 
+            transform: scale(0.8); 
+            animation: pulse 1.5s infinite alternate;
+        }
+        .loading-gif {
+            width: 100%; /* Stretch GIF to cover the 150x150 container */
+            height: 100%;
+            object-fit: cover; 
+            border-radius: 8px; 
+            display: block;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.9); box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
+            to { transform: scale(1.0); box-shadow: 0 0 25px rgba(77, 166, 255, 0.8); }
+        }
+
+        /* Success Container for URL Details (Titles are added here) */
+        #successUrlDetails {
+            margin: 0 25px 20px;
+            padding: 15px 20px; /* Increased padding */
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+            word-break: break-all;
+        }
+        #successUrlDetails .url-label {
+            font-size: 0.9em;
+            color: var(--muted);
+            margin: 0;
+            padding: 0;
+            display: block;
+            margin-top: 10px;
+        }
+        #successUrlDetails .url-label:first-child {
+            margin-top: 0;
+        }
+        #successUrlDetails strong {
+            color: var(--text);
+            display: block;
+            margin-top: 5px;
+            font-size: 1.0em;
+        }
+        #successUrlDetails strong a {
+             color: var(--accent); /* Make the links stand out */
+             font-weight: 700;
+        }
+
+
+        /* Dedicated Countdown Status */
+        #countdownStatus {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 193, 7, 0.1); 
+            border-radius: 6px;
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+            font-weight: 600;
+            font-size: 1.1em;
+            display: block;
+        }
+        
+        /* Success Status Overrides */
+        #countdownStatus.complete {
+            background-color: rgba(56, 193, 114, 0.3);
+            border-color: var(--success-color);
+            color: var(--text);
+        }
+        #countdownStatus.complete span {
+            color: var(--success-color) !important;
+        }
+        
+        /* HISTORY SECTION STYLES */
+        #linkHistoryContainer {
+            margin-top: 40px;
+            padding: 0; 
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        #linkHistoryContainer h2 {
+            background: var(--sidebar-bg);
+            color: var(--accent);
+            font-size: 24px;
+            padding: 15px 25px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        #linkHistoryList {
+            padding: 0 25px 25px;
+            background: var(--card); 
+        }
+        .history-item {
+            margin-top: 25px;
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 2px solid var(--success-color); 
+            background: rgba(56, 193, 114, 0.1); /* Lighter success shade for history */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            text-align: left;
+            position: relative;
+            transition: all 0.5s ease-in-out; 
+        }
+        .history-item .success-header {
+            font-size: 1.1em;
+            color: var(--success-color);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .history-item .history-link-details {
+             margin: 10px 0;
+             padding: 10px 0;
+             border-top: 1px dashed rgba(255,255,255,0.1);
+             border-bottom: 1px dashed rgba(255,255,255,0.1);
+             text-align: left;
+        }
+        /* FIX: Apply word-break to the strong and anchor tags to handle long URLs */
+        .history-item .history-link-details strong {
+             font-size: 1.0em;
+             color: var(--text);
+             display: block;
+             margin-top: 5px;
+             word-break: break-all; /* Ensures long, unbroken URL strings wrap */
+             white-space: normal;
+        }
+        .history-item .history-link-details strong a {
+            color: var(--accent);
+            word-break: break-all; /* Apply to the link itself */
+            display: inline-block; /* Helps link wrapping inside block elements */
+        }
+        /* END FIX */
+        .history-item .history-link-details .url-label {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* === FIX: Link Display and Copy Button Adjustment === */
+        #linkDisplay { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 12px; 
+            background-color: #fff; 
+            border: 1px solid var(--success-color); 
+            margin-top: 15px;
+            border-radius: 6px;
+            transition: all 0.3s ease-in-out; 
+        }
+        #shortLinkText { 
+            font-weight: bold; 
+            color: #333; 
+            text-decoration: none;
+            flex-grow: 1; 
+            min-width: 0; 
+            text-align: left;
+            padding-right: 10px;
+            font-size: 1.1em;
+            word-break: break-all; 
+        }
+        #shortLinkText:hover {
+            text-decoration: underline;
+        }
+        
+        #linkDisplay button {
+            background-color: var(--success-color); 
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s, transform 0.2s, opacity 0.3s; 
+            font-size: 14px;
+            width: auto; 
+            margin: 0;
+            font-weight: 600;
+            flex-shrink: 0; 
+        }
+        #linkDisplay button:hover {
+            background-color: #2e8b57;
+            transform: translateY(-1px); 
+        }
+        /* === END FIX === */
+        
+        .reference-link { 
+            font-size: 0.8em; 
+            color: var(--muted); 
+            margin-top: 10px; 
+            word-wrap: break-word;
+            text-align: center;
+        }
+        
+        /* Contact Form Styles (Kept unchanged) */
+        .contact{background:var(--sidebar-bg);padding:40px 25px;text-align:center;border-radius:16px;margin:40px auto;max-width:1100px;box-shadow:0 4px 12px rgba(0,0,0,0.4);}
+        .contact h2{font-size:2rem;margin-bottom:15px;color:var(--accent);}
+        .contact-items{display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin-bottom:20px;}
+        .contact-item{text-align:center; max-width:220px;}
+        .contact-item img{width:30px; margin-bottom:8px;}
+        .contact-item p{color:var(--muted); font-size:12px; line-height:1.4;}
+        .contact-form {display: flex;flex-direction: column;gap: 15px;max-width: 500px;margin: 0 auto;padding: 20px;}
+        .contact-form input[type="text"],.contact-form input[type="email"],.contact-form input[type="tel"],.contact-form textarea {width: 100%;padding: 10px;border: 1px solid #ddd;border-radius: 4px;box-sizing: border-box;transition: border-color 0.3s;background-color: #fff;color: #333;font-size: 16px;}
+        .contact-form textarea {height: 100px;}
+        .contact-form button {background-color: var(--accent);color: #000;padding: 8px 16px;border: none;border-radius: 8px;cursor: pointer;font-size: 0.9rem;font-weight: 600;transition: 0.3s;align-self: flex-start;}
+        .contact-form button:hover {background: #fff;color: #000;transform: scale(1.05);}
+        .contact-form button:disabled {background-color: #cccccc;cursor: not-allowed;transform: none;}
+        .status-box {margin-top: 15px;padding: 10px;border-radius: 4px;text-align: center;font-size: 16px;}
+        .status-success {background-color:var(--success-color);color: #fff;font-weight: bold;}
+        .submitting{background-color: #ffc107;color: #fff;font-weight: bold;border-radius: 16px;padding: 20px 25px;box-shadow: 0 6px 18px rgba(0,0,0,0.4);animation: fadeSlide 0.7s ease forwards;max-width: 500px;margin: 15px auto;}
+        .status-error {background: rgba(255,0,0,0.2);color: #ff0000; font-weight: bold;border-radius: 16px;padding: 20px 25px;box-shadow: 0 6px 18px rgba(0,0,0,0.4);animation: fadeSlide 0.7s ease forwards;max-width: 500px;margin: 15px auto;}
+        .error-input {border-color: red !important;}
+        .error-message {color: var(--error-color);font-size: 12px;margin-top: 5px;margin-bottom: 3px;display: none;text-align: left;}
+        .form-group {display: flex;flex-direction: column;}
+        .content-card-like {color: #ffffff; border-radius: 16px;padding: 20px 25px;box-shadow: 0 6px 18px rgba(0,0,0,0.4);animation: fadeSlide 0.7s ease forwards;max-width: 500px;margin: 15px auto;}
+        .socials {margin-top: 15px;text-align: center;display: flex;justify-content: center;align-items: center;flex-wrap: wrap;gap: 30px; }
+        .social-item {text-align: center;}
+        .contact-item a {text-decoration: none; color: inherit;}
+        .social-item a {text-decoration: none; color: inherit;}
+        .social-item img {width: 40px; margin: 0 auto 5px;}
+        .social-item p {color: white;font-size: 14px; margin: 0;}
+        .socials img:hover{transform:scale(1.3);}
+        .contact img:hover{transform:scale(1.3);}
+        /* NEW: Style for the Wait/Cooldown message box */
+        .wait-notification {
+            margin: 10px 25px 25px;
+            padding: 15px; 
+            border-radius: 8px;
+            /* Using accent color for high visibility */
+            background: rgba(77, 166, 255, 0.15); /* Light blue background */
+            border: 1px solid var(--accent); 
+            color: var(--text); 
+            font-weight: 500;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .wait-notification h3 {
+            font-size: 1.2em; 
+            margin: 0;
+            color: var(--accent); /* Highlight the message with accent color */
+            font-weight: 700;
+        }
+        /* New style to force placeholder text to black */
+    input::placeholder {
+        color: #000 !important; /* Forces placeholder text to black */
+        opacity: 1; /* Ensures the text is fully opaque */
+    }
+    /* ------------------------------------------- */
+    /* MEDIA QUERIES FOR DESKTOP (Min-width: 768px) */
+    /* ------------------------------------------- */
+
+    @media (min-width: 768px) {
+        
+        /* Restore larger desktop settings */
+        body {
+            font-size: 16px; 
+        }
+
+        /* Header Adjustments */
+        header img{
+            height: 60px;
+        }
+
+        header .seds-logo {
+            height: 70px;
+        }
+        
+        .events-title {
+            margin-top: 8px;
+            font-size: 50px; /* Restored fixed size for desktop title */
+        }
+
+        /* Layout/Section Adjustments */
+        .section{
+            margin: 40px auto;
+            padding: 35px; 
+            max-width: 800px; 
+        }
+
+        .section h1,
+        .contact h2 {
+            font-size: 32px; 
+            margin-bottom: 14px;
+        }
+
+        .section p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Input & Button Adjustments */
+        input[type="text"], input[type="url"], input[type="email"] { 
+            padding: 15px; 
+            font-size: 18px; 
+        }
+
+        #submitBtn { 
+            padding: 15px 15px; 
+            margin-top: 20px; 
+            font-size: 18px;
+        }
+        
+        /* Loading/Output Adjustments */
+        .loading-gif-container {
+            width: 300px; 
+            height: 300px;
+        }
+        
+        /* History Adjustments */
+        #linkHistoryContainer {
+            margin-top: 40px;
+            max-width: 800px;
+        }
+
+        #linkHistoryContainer h2 {
+            font-size: 24px;
+            padding: 15px 25px;
+        }
+
+        #linkHistoryList {
+            padding: 0 25px 25px;
+        }
+        
+        /* Contact Section Adjustments */
+        .contact{
+            padding: 40px 25px;
+            max-width: 1100px;
+        }
+        .socials img:hover{transform:scale(1.3);}
+        .contact img:hover{transform:scale(1.3);}
+        
+        /* Sidebar is implicitly handled by the base CSS when not active */
+    }
+    </style>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kumaraguru SEDS",
+    "url": "https://kumaraguruseds.space/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://kumaraguruseds.space/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Kumaraguru SEDS",
+    "url": "https://kumaraguruseds.space/",
+    "logo": "https://kumaraguruseds.space/sedsb.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "seds@kct.ac.in",
+      "telephone": "+91-9344752075",
+      "contactType": "Customer Support",
+      "areaServed": "IN",
+      "availableLanguage": "English"
+    },
+    "sameAs": [
+      "https://youtube.com/@kumaraguru_seds",
+      "https://www.linkedin.com/company/seds-kct/",
+      "https://www.instagram.com/seds_kumaraguru/"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": [
+      "Home",
+      "Vision",
+      "Mission",
+      "Staff Coordinator",
+      "Our Teams",
+      "Contact Us",
+      "Events",
+      "Kosmorena'25",
+      "Kosmorena'24",
+      "Kosmorena'21",
+      "Events Team Members",
+      "PR Team Members",
+      "Admin Team Members",
+      "IM & PM Team Members",
+      "Media Team Members",
+      "Finance Team Members",
+      "Astronomy Team Members"
+    ],
+    "url": [
+      "https://kumaraguruseds.space/#home",
+      "https://kumaraguruseds.space/#vision",
+      "https://kumaraguruseds.space/#mission",
+      "https://kumaraguruseds.space/#staff",
+      "https://kumaraguruseds.space/#teams",
+      "https://kumaraguruseds.space/#contact",
+      "https://kumaraguruseds.space/Events.html",
+      "https://kumaraguruseds.space/Kosmorena25.html",
+      "https://kumaraguruseds.space/Kosmorena24.html",
+      "https://sedsalpha.wordpress.com/kosmorena-2021/",
+      "https://kumaraguruseds.space/team_members_event.html",
+      "https://kumaraguruseds.space/team_members_pr.html",
+      "https://kumaraguruseds.space/team_members_admin.html",
+      "https://kumaraguruseds.space/team_members_impm.html",
+      "https://kumaraguruseds.space/team_members_media.html",
+      "https://kumaraguruseds.space/team_members_finance.html",
+      "https://kumaraguruseds.space/astronomy_team_members.html"
+    ]
+  }
+  </script>
+</head>
+<body>
+    <div class="stars-container"></div>
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" onclick="toggleSidebar()">Menu ×</span>
+        <a href="index.html#home">Home</a>
+        <a href="index.html#vision">Vision</a>
+        <a href="index.html#mission">Mission</a>
+        <a href="index.html#staff">Staff Coordinator</a>
+        <a href="index.html#teams">Our Teams</a>
+        <a href="#contact">Contact Us</a>
+        <a href="Events.html">Events</a>
+        <a href="Kosmorena25.html">Kosmorena'25</a>
+        <a href="Kosmorena25.html">Kosmorena'24</a>
+        <a href="https://sedsalpha.wordpress.com/kosmorena-2021/">Kosmorena'21</a>
+        <a href="team_members_event.html">Events Team Members</a>
+        <a href="team_members_pr.html">PR Team Members</a>
+        <a href="team_members_admin.html">Admin Team Members</a>
+        <a href="team_members_impm.html">IM & PM Team Members</a>
+        <a href="team_members_media.html">Media Team Members</a>
+        <a href="team_members_finance.html">Finance Team Members</a>
+        <a href="astronomy_team_members.html">Astronomy Team Members</a>
+    </div>
+    <header>
+        <div class="left-header">
+            <span class="hamburger" onclick="toggleSidebar()">☰</span>
+            <img src="kumaraguru.png" alt="Kumaraguru Institutions">
+        </div>
+        <img src="SEDS.png" alt="SEDS Logo" class="seds-logo">
+    </header>
+    <h1 class="events-title">WELCOME!</h1>
+    <div class="section" id="vision">
+        <h1>🚀 Professional URL Shortener</h1>
+        <p style="text-align: center; color: var(--accent); font-size: 1.1em;">Instantly generate and deploy redirect links for our custom domain: <strong>https://kumaraguruseds.space/</strong></p>
+        <form id="shortenerForm">
+            <label for="longUrl">Destination URL (The long link)</label>
+            <input type="url" id="longUrl" name="longUrl" placeholder="https://www.your-long-url.com" required>
+            <span id="longUrlValidation" class="validation-message"></span>
+
+            <label for="slug">Custom Short Code (Link ID)</label>
+            <div id="slugConstraint">
+                Allowed characters: a-z, 0-9, dash (-), underscore (_), and forward slash (/).
+            </div>
+            <input type="text" id="slug" name="slug" placeholder="e.g., event-signup/register" pattern="^[a-zA-Z0-9_\-\/]+$" title="Only letters, numbers, hyphens, underscores, and forward slashes." required>
+            <span id="slugValidation" class="validation-message"></span>
+
+            <label for="emailInput">Email ID (Optional)</label>
+            <input type="email" id="emailInput" name="email" placeholder="Your email for notification (optional)">
+            <span id="emailValidation" class="validation-message"></span>
+            
+            <button type="submit" id="submitBtn">Create & Deploy Short Link</button>
+        </form>
+        <div id="output" style="display: none;"></div> 
+    </div>
+
+    <div id="linkHistoryContainer" style="display: none;" class="section show">
+        <h2>Link Generation History</h2>
+        <div id="linkHistoryList">
+            </div>
+    </div>
+    <div class="contact" id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-items">
+            <div class="contact-item">
+                <a href="https://maps.app.goo.gl/TBWDGsAeKccGw9cm8" target="_blank">
+                    <img src="location.png" alt="Location">
+                    <p>Kumaraguru Campus<br>Saravanampatti,<br>Chinnavedampatti (Post),<br>Coimbatore- 641049, Tamilnadu.</p>
+                </a>
+            </div>
+
+            <div class="contact-item">
+                <a href="mailto:seds@kct.ac.in,manilunar07@gmail.com">
+                    <img src="email.png" alt="Email">
+                    <p>manilunar07@gmail.com<br>seds@kct.ac.in</p>
+                </a>
+            </div>
+
+            <div class="contact-item">
+                <a href="tel:+919344752075">
+                    <img src="phone.png" alt="Phone">
+                    <p>+91 9344752075</p>
+                </a>
+            </div>
+        </div>
+           <form class="contact-form" id="contactForm" novalidate action="..." method="post">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Your Email" required>
+                <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <input type="tel" name="phone" placeholder="Phone Number" required>
+                <span class="error-message"></span>
+                </div>
+            <div class="form-group">
+                <textarea name="message" placeholder="Your Message" required></textarea>
+                <span class="error-message"></span>
+            </div>
+            <button type="submit">Send Message</button>
+            <div id="status" class="status-box content-card-like" style="display: none;"></div>
+        </form>
+        <br>
+        <div class="socials">
+            <div class="social-item">
+                <a href="https://www.instagram.com/seds_kumaraguru">
+                    <img src="instagram.png" alt="Instagram">
+                    <p>seds_kumaraguru</p>
+                </a>
+            </div>
+            <div class="social-item">
+                <a href="https://www.linkedin.com/company/seds-kct/">
+                    <img src="linkedin.png" alt="LinkedIn">
+                    <p>Kumaraguru SEDS</p>
+                </a>
+            </div>
+            <div class="social-item">
+                <a href="https://youtube.com/@kumaraguru_seds">
+                    <img src="youtube.png" alt="Email">
+                    <p>Kumaraguru_SEDS</p>
+                </a>
+            </div>
+
+        </div>
+        <br>
+        <h2>Follow Us</h2>
+    </div>
+
+    <script>
+        // !! IMPORTANT: Configure your Google App Script URL here !!
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8ac7FRHVW6Pez4YCrjLBRCbsYqG12lHcBJXMk1vQpE6lJYKK2sHSJCrbGQwnBGPGs/exec';
+        const CUSTOM_DOMAIN_BASE = 'https://kumaraguruseds.space/';
+        
+        let slugCheckTimeout;
+        let emailCheckTimeout;
+        let isSlugAvailable = false;
+        let isUrlValid = false;
+        let isEmailValid = true; // Optional field, starts as true
+
+        const longUrlInput = document.getElementById('longUrl');
+        const slugInput = document.getElementById('slug');
+        const emailInput = document.getElementById('emailInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const longUrlValidation = document.getElementById('longUrlValidation');
+        const slugValidation = document.getElementById('slugValidation');
+        const emailValidation = document.getElementById('emailValidation');
+        const outputDiv = document.getElementById('output');
+        const historyContainer = document.getElementById('linkHistoryContainer');
+        const historyList = document.getElementById('linkHistoryList');
+        
+        // Messages for 7-second sequence (4 steps * 1.75s = 7s)
+        const loadingMessages = [
+            'Initiating Secure Deployment Protocol...',
+            'Establishing Link ID Security...',
+            'Database Synchronization in Progress...',
+            'Deploying Redirect to Server...',
+        ];
+
+        // Global map to hold interval IDs for each history item's countdown
+        const countdownIntervals = new Map();
+        const mainOutputId = 'main_output'; // Unique ID for the current main output
+
+        // --- Core Validation Functions ---
+
+        /**
+         * Checks all validation states and enables/disables the submit button.
+         */
+        function updateSubmitButton() {
+            // Button is enabled ONLY if URL is valid AND Slug is available AND Email is valid (if present)
+            const isFinished = outputDiv.className === 'success' || outputDiv.className === 'loading';
+            submitBtn.disabled = isFinished || !(isSlugAvailable && isUrlValid && isEmailValid);
+        }
+
+        /**
+         * Checks if the slug is available using a GET request to the App Script.
+         */
+        async function checkSlugAvailability(slug) {
+            if (slug.length < 3) {
+                slugValidation.className = 'validation-message invalid';
+                slugValidation.textContent = 'Link ID must be at least 3 characters.';
+                isSlugAvailable = false;
+                updateSubmitButton(); 
+                return;
+            }
+            // Check HTML5 pattern for /,-,_
+            const pattern = new RegExp(slugInput.getAttribute('pattern'));
+            if (!pattern.test(slug)) {
+                slugValidation.className = 'validation-message invalid';
+                slugValidation.textContent = 'Link ID contains unsupported characters.';
+                isSlugAvailable = false;
+                updateSubmitButton();
+                return;
+            }
+
+
+            slugValidation.className = 'validation-message checking';
+            slugValidation.textContent = 'Checking availability...';
+            
+            try {
+                // NOTE: The App Script must be deployed to handle checkSlug action
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=checkSlug&slug=${encodeURIComponent(slug)}`);
+                const result = await response.json(); 
+
+                if (result.available) {
+                    slugValidation.className = 'validation-message available';
+                    slugValidation.textContent = 'Link ID is available! ✅';
+                    isSlugAvailable = true;
+                } else {
+                    slugValidation.className = 'validation-message taken';
+                    slugValidation.textContent = 'Link ID is already taken. ❌';
+                    isSlugAvailable = false;
+                }
+            } catch (error) {
+                console.error("Slug check error:", error);
+                slugValidation.className = 'validation-message invalid';
+                slugValidation.textContent = 'Error checking ID. Please try again. ⚠️';
+                isSlugAvailable = false;
+            }
+            updateSubmitButton(); 
+        }
+
+        /**
+         * Checks if the long URL is in a valid format.
+         */
+        function checkUrlExistence(url) {
+            const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+            if (!urlRegex.test(url)) {
+                longUrlValidation.className = 'validation-message invalid';
+                longUrlValidation.textContent = 'Please enter a valid URL (e.g., https://example.com). ❌';
+                isUrlValid = false;
+            } else {
+                longUrlValidation.className = 'validation-message available';
+                longUrlValidation.textContent = 'URL format is valid. ✅';
+                isUrlValid = true;
+            }
+            updateSubmitButton(); 
+        }
+        
+        /**
+         * Checks if the email format is valid (optional field).
+         */
+        function checkEmailValidity(email) {
+            if (!email) {
+                emailValidation.textContent = '';
+                isEmailValid = true; // Email is optional, so empty is valid
+                return;
+            }
+            
+            const emailRegex = /^\S+@\S+\.\S+$/;
+            if (!emailRegex.test(email)) {
+                emailValidation.className = 'validation-message invalid';
+                emailValidation.textContent = 'Please enter a valid email format. ❌';
+                isEmailValid = false;
+            } else {
+                emailValidation.className = 'validation-message available';
+                emailValidation.textContent = 'Email format is valid. ✅';
+                isEmailValid = true;
+            }
+            updateSubmitButton();
+        }
+
+        /**
+         * Clears all validation messages from the UI and resets state.
+         */
+        function clearValidationMessages() {
+            longUrlValidation.textContent = '';
+            longUrlValidation.className = 'validation-message';
+            slugValidation.textContent = '';
+            slugValidation.className = 'validation-message';
+            emailValidation.textContent = '';
+            emailValidation.className = 'validation-message';
+            
+            // CRITICAL: Explicitly reset the state variables
+            isSlugAvailable = false;
+            isUrlValid = false;
+            isEmailValid = true; // Resetting optional field to valid
+            
+            // Manually force button update, ensuring it stays disabled after form reset
+            updateSubmitButton(); 
+        }
+        
+        /**
+         * Moves the successful content from the main output to the history container.
+         * This runs at the START of a *new* submission if the output is currently showing success.
+         */
+        function moveCurrentOutputToHistory() {
+            // Check if there is a previous successful link to move
+            if (outputDiv.className !== 'success') return; 
+
+            // 1. Capture the critical data from the currently visible #output
+            const currentOriginalUrlElement = outputDiv.querySelector('#successUrlDetails strong a');
+            const currentShortUrlElement = outputDiv.querySelector('#linkDisplay a');
+            const currentStatusElement = outputDiv.querySelector('#countdownStatus');
+            const currentScriptConfirmationElement = outputDiv.querySelector('#scriptConfirmation');
+
+            if (!currentOriginalUrlElement) return; // Safety check
+
+            const currentOriginalUrl = currentOriginalUrlElement.href;
+            const currentShortUrl = currentShortUrlElement.textContent;
+            const currentScriptConfirmation = currentScriptConfirmationElement ? currentScriptConfirmationElement.textContent : '';
+            const isCompleted = currentStatusElement.classList.contains('complete');
+
+            // Get the current timer value
+            let remainingTime = 30; 
+            const currentTimerElement = outputDiv.querySelector('#countdownTimer');
+            if (currentTimerElement && !isCompleted) {
+                const match = currentTimerElement.textContent.match(/(\d+) seconds/);
+                if (match) remainingTime = parseInt(match[1], 10);
+            }
+            
+            // 2. Clear the main output's interval before moving it
+            const currentIntervalId = countdownIntervals.get(mainOutputId);
+            if (currentIntervalId) {
+                clearInterval(currentIntervalId);
+                countdownIntervals.delete(mainOutputId);
+            }
+
+            // 3. Create the history item element
+            const historyItem = document.createElement('div');
+            const histId = `hist_${Date.now()}`; 
+            historyItem.className = 'history-item'; 
+
+            // Create the inner HTML dynamically
+            historyItem.innerHTML = `
+                <div class="success-header">✅ Link Generated: ${new Date().toLocaleTimeString()}</div>
+                
+                <div class="history-link-details">
+                    <span class="url-label">Original URL:</span>
+                    <strong><a href="${currentOriginalUrl}" target="_blank" style="color: inherit; text-decoration: underline; word-break: break-all; display: inline-block;">${currentOriginalUrl}</a></strong>
+                    <span class="url-label" style="margin-top: 10px;">Shortened Link:</span>
+                    <strong><a href="${currentShortUrl}" target="_blank" style="color: var(--accent); text-decoration: underline;">${currentShortUrl}</a></strong>
+                </div>
+
+                <div id="linkDisplay_${histId}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #fff; border: 1px solid var(--success-color); margin-top: 15px; border-radius: 6px; transition: all 0.3s ease-in-out;">
+                    <a id="shortLinkText_${histId}" href="${currentShortUrl}" target="_blank" 
+                       style="font-weight: bold; color: #333; text-decoration: none; flex-grow: 1; min-width: 0; text-align: left; padding-right: 10px; font-size: 1.1em; word-break: break-all;">${currentShortUrl}</a>
+                    
+                    <button type="button" onclick="copyLink('${currentShortUrl}', this)" 
+                            style="background-color: var(--success-color); color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; flex-shrink: 0; transition: background-color 0.3s, transform 0.2s, opacity 0.3s;">Copy</button>
+                </div>
+
+                <div id="countdownStatus_${histId}" class="success ${isCompleted ? 'complete' : ''}" style="margin-top: 20px; padding: 10px; border: 1px solid ${isCompleted ? 'var(--success-color)' : 'var(--warning-color)'}; color: ${isCompleted ? 'var(--text)' : 'var(--warning-color)'}; font-weight: 600; font-size: 1.1em; display: block; background: ${isCompleted ? 'rgba(56, 193, 114, 0.3)' : 'rgba(255, 193, 7, 0.1)'};">
+                    ${isCompleted ? 
+                        '<span style="font-weight: 700; color: var(--success-color);">🚀 Deployment Complete! Link is Fully Active.</span>'
+                        : 
+                        '<span style="display: block; font-weight: 700;">📡 Server Deployment Commenced...</span><span id="historyCountdownTimer_' + histId + '" style="display: block; margin-top: 5px;">Link active in: ' + remainingTime + ' seconds</span>'
+                    }
+                </div>
+                <p id="historyScriptConfirmation_${histId}" class="reference-link" style="display: ${isCompleted ? 'block' : 'none'}; margin: 10px 0 0 0;">${currentScriptConfirmation}</p>
+            `;
+            
+            // 4. Prepend the new item to the history list (newest first)
+            historyList.prepend(historyItem);
+            historyContainer.style.display = 'block';
+
+            // 5. If the link was NOT completed, restart the countdown for the new history item clone
+            if (!isCompleted) {
+                let timer = remainingTime;
+                const newTimerElement = historyItem.querySelector(`#historyCountdownTimer_${histId}`);
+                const newStatusElement = historyItem.querySelector(`#countdownStatus_${histId}`);
+                const newScriptConfirmationElement = historyItem.querySelector(`#historyScriptConfirmation_${histId}`);
+
+                const historyInterval = setInterval(() => {
+                    timer--;
+                    if (timer >= 0) {
+                        newTimerElement.textContent = `Link active in: ${timer} seconds`;
+                    } else {
+                        clearInterval(historyInterval);
+                        newStatusElement.classList.add('complete'); 
+                        newStatusElement.innerHTML = `<span style="font-weight: 700; color: var(--success-color);">🚀 Deployment Complete! Link is Fully Active.</span>`;
+                        newScriptConfirmationElement.style.display = 'block'; 
+                    }
+                }, 1000);
+                
+                countdownIntervals.set(histId, historyInterval); // Store with a distinct history ID
+            }
+
+            // 6. Clear the main output area to show the loading screen for the NEW submission
+            outputDiv.innerHTML = ''; 
+            outputDiv.className = '';
+            outputDiv.style.display = 'none';
+        }
+
+        /**
+         * Initiates the self-move of the main output to history when its countdown hits zero.
+         */
+        function handleCountdownEnd(originalUrl, finalShortUrl, appsScriptResultText) {
+            // This function runs when the main output's timer hits zero.
+            
+            // 1. Clear the main output's interval (already done in setInterval)
+            countdownIntervals.delete(mainOutputId);
+            
+            // 2. Create the history item element (using the already completed state)
+            const historyItem = document.createElement('div');
+            const histId = `hist_${Date.now()}`; 
+            historyItem.className = 'history-item'; 
+
+            historyItem.innerHTML = `
+                <div class="success-header">✅ Link Generated: ${new Date().toLocaleTimeString()}</div>
+                
+                <div class="history-link-details">
+                    <span class="url-label">Original URL:</span>
+                    <strong><a href="${originalUrl}" target="_blank" style="color: inherit; text-decoration: underline; font-size:13px; word-break: break-all; display: inline-block;">${originalUrl}</a></strong>
+                    <span class="url-label" style="margin-top: 10px;">Shortened Link:</span>
+                    <strong><a href="${finalShortUrl}" target="_blank" style="color: var(--accent); text-decoration: underline;">${finalShortUrl}</a></strong>
+                </div>
+
+                <div id="linkDisplay_${histId}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #fff; border: 1px solid var(--success-color); margin-top: 15px; border-radius: 6px; transition: all 0.3s ease-in-out;">
+                    <a id="shortLinkText_${histId}" href="${finalShortUrl}" target="_blank" 
+                       style="font-weight: bold; color: #333; text-decoration: none; flex-grow: 1; min-width: 0; text-align: left; padding-right: 10px; font-size: 1.1em; word-break: break-all;">${finalShortUrl}</a>
+                    
+                    <button type="button" onclick="copyLink('${finalShortUrl}', this)" 
+                            style="background-color: var(--success-color); color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; flex-shrink: 0; transition: background-color 0.3s, transform 0.2s, opacity 0.3s;">Copy</button>
+                </div>
+
+                <div id="countdownStatus_${histId}" class="success complete" style="margin-top: 20px; padding: 10px; border: 1px solid var(--success-color); color: var(--text); font-weight: 600; font-size: 1.1em; display: block; background: rgba(56, 193, 114, 0.3);">
+                    <span style="font-weight: 700; color: var(--success-color);">🚀 Deployment Complete! Link is Fully Active.</span>
+                </div>
+                <p id="historyScriptConfirmation_${histId}" class="reference-link" style="display: block; margin: 10px 0 0 0;">Script Confirmation: ${appsScriptResultText}</p>
+            `;
+            
+            // 3. Prepend the new item to the history list (newest first)
+            historyList.prepend(historyItem);
+            historyContainer.style.display = 'block';
+
+            // 4. Clear the main output area 
+            outputDiv.innerHTML = ''; 
+            outputDiv.className = '';
+            outputDiv.style.display = 'none';
+            
+            // Re-check button state (will be disabled until new input is valid)
+            updateSubmitButton(); 
+        }
+
+
+        // --- New Reset Handler ---
+        document.getElementById('shortenerForm').addEventListener('reset', (e) => {
+            // When the form is reset, we just clear the validation state.
+            clearValidationMessages(); 
+        });
+
+
+        // --- Event Listeners for Real-Time Validation ---
+
+        document.addEventListener('DOMContentLoaded', updateSubmitButton); 
+
+        // Real-time character check AND availability check for slug
+        slugInput.addEventListener('input', () => {
+            // Clear output only if it's NOT a successful link displayed from the LAST submission
+            // if (outputDiv.className === 'error' || outputDiv.className === 'loading') clearOutput(); 
+            // Note: clearOutput() function is missing, commenting out to prevent error
+
+            if (outputDiv.className === 'error' || outputDiv.className === 'loading') {
+                outputDiv.innerHTML = '';
+                outputDiv.className = '';
+                outputDiv.style.display = 'none';
+            }
+            
+            const slug = slugInput.value;
+            const pattern = new RegExp(slugInput.getAttribute('pattern'));
+
+            // 1. Character validation
+            if (!pattern.test(slug)) {
+                slugValidation.className = 'validation-message invalid';
+                slugValidation.textContent = 'Unsupported characters detected! Only a-z, 0-9, -, _, / are allowed.';
+                isSlugAvailable = false;
+                updateSubmitButton();
+                clearTimeout(slugCheckTimeout);
+                return;
+            }
+
+            // 2. Availability check
+            clearTimeout(slugCheckTimeout);
+            slugValidation.className = 'validation-message checking';
+            slugValidation.textContent = 'Typing...';
+            isSlugAvailable = false;
+            updateSubmitButton();
+
+            slugCheckTimeout = setTimeout(() => {
+                if (slug) {
+                    checkSlugAvailability(slug);
+                } else {
+                    slugValidation.textContent = '';
+                }
+            }, 500); 
+        });
+
+        longUrlInput.addEventListener('input', () => {
+            // Clear output only if it's NOT a successful link displayed from the LAST submission
+            // if (outputDiv.className === 'error' || outputDiv.className === 'loading') clearOutput(); 
+            // Note: clearOutput() function is missing, commenting out to prevent error
+            if (outputDiv.className === 'error' || outputDiv.className === 'loading') {
+                outputDiv.innerHTML = '';
+                outputDiv.className = '';
+                outputDiv.style.display = 'none';
+            }
+
+            const url = longUrlInput.value.trim();
+            checkUrlExistence(url);
+        });
+        
+        emailInput.addEventListener('input', () => {
+            const email = emailInput.value.trim();
+            checkEmailValidity(email);
+        });
+
+        // --- Submission Logic ---
+
+        document.getElementById('shortenerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 1. CRITICAL FIX: Immediately disable the button upon click.
+            submitBtn.disabled = true; 
+            
+            // **CRITICAL FIX 2:** If the last operation was a success, move it to history NOW
+            // This ensures the previous link is archived the moment the user clicks "submit" again.
+            if (outputDiv.className === 'success') {
+                 moveCurrentOutputToHistory(); 
+            }
+            
+            outputDiv.style.display = 'block';
+            outputDiv.className = 'loading'; // Show loading UI immediately
+
+            // Final check on URL format and email validity
+            checkUrlExistence(longUrlInput.value.trim());
+            checkEmailValidity(emailInput.value.trim());
+
+            if (!isSlugAvailable || !isUrlValid || !isEmailValid) {
+                // Run final async slug check if needed
+                if (!isSlugAvailable) await checkSlugAvailability(slugInput.value.trim());
+
+                if (!isSlugAvailable || !isUrlValid || !isEmailValid) {
+                     outputDiv.innerHTML = '<strong>Error:</strong> Please fix the validation errors before submitting.';
+                     outputDiv.className = 'error';
+                     outputDiv.style.display = 'block';
+                     submitBtn.disabled = false; // Re-enable so user can fix form
+                     return;
+                }
+            }
+
+            const originalUrl = longUrlInput.value.trim();
+            const submittedSlug = slugInput.value.trim();
+            const finalShortUrl = CUSTOM_DOMAIN_BASE + submittedSlug;
+            const formData = new FormData(this);
+
+            let currentMessageIndex = 0;
+            const totalLoadingSteps = loadingMessages.length;
+            const loadingDurationPerStep = 1750; // 1.75 seconds per message (Total 7 seconds)
+            let loadingInterval;
+
+            // Function to display iterative loading messages and dynamic conversion
+            function startLoadingSequence() {
+                // Draw the initial state
+                outputDiv.innerHTML = `
+                    <div id="loadingArea">
+                        <div id="conversionDisplay">
+                            <div class="loading-message-box" style="opacity: 1;">${loadingMessages[0]}</div>
+                        </div>
+                        <div class="loading-gif-container">
+                            <img src="loading.gif" alt="Processing animation" class="loading-gif">
+                        </div>
+                    </div>
+                `;
+                outputDiv.className = 'loading';
+                currentMessageIndex = 1;
+
+                loadingInterval = setInterval(() => {
+                    const messageBox = outputDiv.querySelector('.loading-message-box');
+                    if (messageBox) {
+                        // Fade out old text
+                        messageBox.style.opacity = 0; 
+                        
+                        // Update content and fade in new text after a short delay
+                        setTimeout(() => {
+                            messageBox.textContent = loadingMessages[currentMessageIndex];
+                            messageBox.style.opacity = 1; 
+                            currentMessageIndex = (currentMessageIndex + 1) % totalLoadingSteps;
+                        }, 500); // 0.5s fade transition
+                    }
+                }, loadingDurationPerStep); 
+            }
+
+            function stopLoadingSequence() {
+                clearInterval(loadingInterval);
+            }
+
+            let appsScriptResultText = '';
+
+            try {
+                // 1. Start the loading sequence
+                startLoadingSequence();
+                
+                // Pause execution for the textual animation to run completely (7 seconds)
+                const animationPromise = new Promise(resolve => setTimeout(resolve, totalLoadingSteps * loadingDurationPerStep));
+
+                // 2. Start the actual fetch
+                const fetchPromise = fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: new URLSearchParams(formData)
+                });
+
+                // Wait for BOTH the animation promise AND the fetch promise to complete
+                const [_, response] = await Promise.all([animationPromise, fetchPromise]);
+                
+                stopLoadingSequence(); // Ensure interval is stopped
+
+                appsScriptResultText = await response.text();
+                
+                if (!response.ok || appsScriptResultText.startsWith("Error:")) {
+                    throw new Error(appsScriptResultText.startsWith("Error:") ? appsScriptResultText.substring(6) : `Script returned status ${response.status}. Message: ${appsScriptResultText}`);
+                }
+                
+                // --- SUCCESS FLOW: Display Current Link in Main Output ---
+
+                // 3. Clear the validation status
+                clearValidationMessages();
+
+                // 4. Display initial success message and countdown in the main output
+                outputDiv.innerHTML = `
+                    <p style="font-size: 1.2em; color: var(--success-color); font-weight: bold; margin-bottom: 5px; padding: 25px 25px 5px;">✅ Short Link Generated Successfully!</p>
+                    
+                    <div id="successUrlDetails">
+                        <span class="url-label">Original URL:</span>
+                        <strong><a href="${originalUrl}" target="_blank" style="color: inherit; text-decoration: underline;">${originalUrl}</a></strong>
+                        <span class="url-label" style="margin-top: 15px;">Shortened Link:</span>
+                        <strong><a id="shortLinkTextSuccess" href="${finalShortUrl}" target="_blank" style="color: inherit; text-decoration: underline;">${finalShortUrl}</a></strong>
+                    </div>
+                    
+                    <div id="linkDisplay" style="margin: 15px 25px;">
+                        <a id="shortLinkText" href="${finalShortUrl}" target="_blank">${finalShortUrl}</a>
+                        <button type="button" onclick="copyLink('${finalShortUrl}', this)">Copy</button>
+                    </div>
+                    
+                    <div id="countdownStatus" style="margin: 20px 25px 0;">
+                        <span style="display: block; font-weight: 700;">📡 Server Deployment Commenced...</span>
+                        <span id="countdownTimer" style="display: block; margin-top: 5px;">Link active in: 30 seconds</span>
+                    </div>
+                    
+                    <div id="waitContainer" class="wait-notification">
+                       <h3>
+                    Wait 30 seconds (If you want to make another long URL to short URL)
+                       </h3>
+                    </div>
+
+                    <p id="scriptConfirmation" class="reference-link" style="display: none; margin: 10px 25px 25px;">Script Confirmation: ${appsScriptResultText}</p>
+                `;
+                outputDiv.className = 'success'; 
+                
+                // 5. Start the 30-second countdown (for server sync clarity)
+                let timer = 30;
+                const countdownTimerElement = outputDiv.querySelector('#countdownTimer');
+                const countdownStatusElement = outputDiv.querySelector('#countdownStatus');
+                const scriptConfirmationElement = outputDiv.querySelector('#scriptConfirmation');
+                const mainOutputId = 'main_output'; // Unique ID for the current main output
+
+                const countdownInterval = setInterval(() => {
+                    timer--;
+                    if (timer >= 0) {
+                        countdownTimerElement.textContent = `Link active in: ${timer} seconds`;
+                    } else {
+                        clearInterval(countdownInterval);
+                        
+                        // Final Success Status Update
+                        countdownStatusElement.classList.add('complete'); 
+                        countdownStatusElement.innerHTML = `
+                            <span style="font-weight: 700; color: var(--success-color);">🚀 Deployment Complete! Link is Fully Active.</span>
+                        `;
+                        
+                        scriptConfirmationElement.style.display = 'block'; 
+                        
+                        // CRITICAL: Once the countdown finishes, move the completed link to history!
+                        moveCompletedOutputToHistory(originalUrl, finalShortUrl, appsScriptResultText);
+                    }
+                }, 1000);
+
+                countdownIntervals.set(mainOutputId, countdownInterval); // Store the interval ID for the current link
+
+                // 6. Reset the form fields. This triggers the 'reset' event handler which disables the button.
+                document.getElementById('shortenerForm').reset(); 
+
+            } catch (error) {
+                stopLoadingSequence();
+                console.error('Submit/Sync Error:', error);
+                outputDiv.innerHTML = `<strong>Deployment Failed:</strong> ${error.message}<br>Please check the log and try a different custom short code or check App Script logs.`;
+                outputDiv.className = 'error';
+                submitBtn.disabled = false; // Re-enable on error so user can fix and retry
+            } 
+        });
+
+        /**
+         * Moves the successful content from the main output to the history container.
+         * This runs when the COUNTDOWN HITS ZERO.
+         */
+        function moveCompletedOutputToHistory(originalUrl, finalShortUrl, appsScriptResultText) {
+            // 1. Clear the main output's interval (already done in setInterval)
+            countdownIntervals.delete(mainOutputId);
+            
+            // 2. Create the history item element
+            const historyItem = document.createElement('div');
+            const histId = `hist_${Date.now()}`; 
+            historyItem.className = 'history-item'; 
+
+            // Create the inner HTML dynamically (using the fully completed state)
+            historyItem.innerHTML = `
+                <div class="success-header">✅ Link Generated: ${new Date().toLocaleTimeString()}</div>
+                
+                <div class="history-link-details">
+                    <span class="url-label">Original URL:</span>
+                    <strong><a href="${originalUrl}" target="_blank" style="color: inherit; text-decoration: underline; font-size:13px; word-break: break-all; display: inline-block;">${originalUrl}</a></strong>
+                   <br> <span class="url-label" style="margin-top: 10px;">Shortened Link:</span>
+                    <strong><a href="${finalShortUrl}" target="_blank" style="color: var(--accent); text-decoration: underline;">${finalShortUrl}</a></strong>
+                </div>
+
+                <div id="linkDisplay_${histId}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background-color: #fff; border: 1px solid var(--success-color); margin-top: 15px; border-radius: 6px; transition: all 0.3s ease-in-out;">
+                    <a id="shortLinkText_${histId}" href="${finalShortUrl}" target="_blank" 
+                       style="font-weight: bold; color: #333; text-decoration: none; flex-grow: 1; min-width: 0; text-align: left; padding-right: 10px; font-size: 1.1em; word-break: break-all;">${finalShortUrl}</a>
+                    
+                    <button type="button" onclick="copyLink('${finalShortUrl}', this)" 
+                            style="background-color: var(--success-color); color: #fff; padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; flex-shrink: 0; transition: background-color 0.3s, transform 0.2s, opacity 0.3s;">Copy</button>
+                </div>
+
+                <div id="countdownStatus_${histId}" class="success complete" style="margin-top: 20px; padding: 10px; border: 1px solid var(--success-color); color: var(--text); font-weight: 600; font-size: 1.1em; display: block; background: rgba(56, 193, 114, 0.3);">
+                    <span style="font-weight: 700; color: var(--success-color);">🚀 Deployment Complete! Link is Fully Active.</span>
+                </div>
+                <p id="historyScriptConfirmation_${histId}" class="reference-link" style="display: block; margin: 10px 0 0 0;">Script Confirmation: ${appsScriptResultText}</p>
+            `;
+            
+            // 3. Prepend the new item to the history list (newest first)
+            historyList.prepend(historyItem);
+            historyContainer.style.display = 'block';
+
+            // 4. Clear the main output area 
+            outputDiv.innerHTML = ''; 
+            outputDiv.className = '';
+            outputDiv.style.display = 'none';
+            
+            // Re-check button state (will be disabled until new input is valid)
+            updateSubmitButton(); 
+        }
+
+
+        function copyLink(text, button) {
+            // Use execCommand for better compatibility inside iframes (Canvas)
+            const input = document.createElement('textarea');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+
+            const originalText = button.textContent;
+            button.textContent = 'Copied! ✅';
+            // Added temporary visual feedback and smooth transition reset
+            button.style.backgroundColor = '#2e8b57';
+            setTimeout(() => { 
+                button.textContent = originalText;
+                button.style.backgroundColor = 'var(--success-color)';
+            }, 2000);
+        }
+        
+        // --- Existing Functions (Sidebar, Intersect Observer, Protections, Contact Form) ---
+
+        function toggleSidebar(){ 
+            document.getElementById("sidebar").classList.toggle("active"); 
+        }
+        
+        document.addEventListener("click", function(e){ 
+            const sidebar = document.getElementById("sidebar"); 
+            const hamburger = document.querySelector(".hamburger"); 
+            if(sidebar.classList.contains("active") && !sidebar.contains(e.target) && !hamburger.contains(e.target)){ 
+                sidebar.classList.remove("active"); 
+            } 
+        }); 
+
+        const sections = document.querySelectorAll(".section, .event-gallery"); 
+        const observer = new IntersectionObserver(entries=>{ 
+            entries.forEach(entry=>{ 
+                if(entry.isIntersecting){ 
+                    entry.target.classList.add("show"); 
+                } 
+            }); 
+        },{threshold:0.05}); 
+        sections.forEach(sec=>observer.observe(sec)); 
+        
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable common developer shortcuts
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J
+            if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+                e.preventDefault();
+            }
+
+            // Ctrl+U
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
+
+        // Contact Form Validation and Submission (Kept unchanged)
+        const form = document.getElementById('contactForm');
+        const statusDiv = document.getElementById('status');
+        const contactSubmitButton = form.querySelector('button[type="submit"]');
+
+        function validateField(input) {
+            const errorSpan = input.closest('.form-group').querySelector('.error-message');
+            let errorMessage = '';
+
+            if (input.name === 'name') {
+                if (!input.value.trim()) {
+                    errorMessage = 'Enter your Name.';
+                } else if (!/^[a-zA-Z\s]+$/.test(input.value.trim())) {
+                    errorMessage = 'Please enter a valid name (letters and spaces only).';
+                }
+            } else if (input.name === 'email') {
+                if (!input.value.trim()) {
+                    errorMessage = 'Enter your Email ID.';
+                } else if (!/^\S+@\S+\.\S+$/.test(input.value.trim())) {
+                    errorMessage = 'Please enter a valid email address.';
+                }
+            } else if (input.name === 'phone') {
+                if (!input.value.trim()) {
+                    errorMessage = 'Enter your Phone number.';
+                } else if (input.value.length !== 10 || isNaN(input.value)) {
+                    errorMessage = 'Please enter a valid 10-digit mobile number.';
+                }
+            } else if (input.name === 'message' && !input.value.trim()) {
+                errorMessage = 'Enter your Message here.';
+            }
+
+            if (errorMessage) {
+                input.classList.add('error-input');
+                errorSpan.textContent = errorMessage;
+                errorSpan.style.display = 'block';
+                return false;
+            } else {
+                input.classList.remove('error-input');
+                errorSpan.style.display = 'none';
+                return true;
+            }
+        }
+
+        form.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', () => validateField(input));
+            input.addEventListener('blur', () => validateField(input));
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let allValid = true;
+            form.querySelectorAll('input, textarea').forEach(input => {
+                if (!validateField(input)) {
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                statusDiv.innerHTML = "Please fix the errors above.";
+                statusDiv.className = 'status-error';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            statusDiv.innerHTML = "Submitting...";
+            statusDiv.className = 'submitting';
+            statusDiv.style.display = 'block';
+            contactSubmitButton.disabled = true;
+
+            const formData = new FormData(form);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action);
+            xhr.setRequestHeader('Accept', 'application/json');
+
+            xhr.onload = function() {
+                contactSubmitButton.disabled = false;
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.result === 'success') {
+                            statusDiv.innerHTML = "Message sent successfully!";
+                            statusDiv.className = 'status-box content-card-like status-success';
+                            form.reset();
+                        } else {
+                            statusDiv.innerHTML = "Error: " + response.message;
+                            statusDiv.className = 'status-error';
+                        }
+                    } catch (e) {
+                        statusDiv.innerHTML = "An unexpected error occurred.";
+                        statusDiv.className = 'status-error';
+                    }
+                } else {
+                    statusDiv.innerHTML = "Error: Could not send message.";
+                    statusDiv.className = 'status-error';
+                }
+            };
+            xhr.send(formData);
+        });
+
+       // --- Falling Stars Script ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const starsContainer = document.querySelector('.stars-container');
+        
+        // Change this number to control the quantity of stars
+        const numberOfStars = 200; 
+
+        function createStar() {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${Math.random() * 100}%`;
+            const duration = Math.random() * 5 + 3;
+            const twinkleDuration = Math.random() * 2 + 1;
+            star.style.animation = `
+                fall ${duration}s linear infinite,
+                twinkle ${twinkleDuration}s ease-in-out infinite
+            `;
+            starsContainer.appendChild(star);
+        }
+
+        for (let i = 0; i < numberOfStars; i++) {
+            createStar();
+        }
+    });
+    </script>
+</body>
+</html>
+
