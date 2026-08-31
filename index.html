@@ -155,26 +155,28 @@
       background: rgba(0, 0, 0, 0.5);
       border-bottom: 1px solid var(--border);
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       padding: 10px 24px;
-      height: 70px;
+      gap: 8px;
     }
 
     .left-header {
       display: flex;
       align-items: center;
       gap: 15px;
+      flex: 1;                  /* take available width so space-between works */
     }
 
     .logo-kct {
-      height: 60px;
+      height: 68px;
       object-fit: contain;
       transition: 0.3s;
     }
 
     .logo-seds {
-      height: 70px;
+      height: 78px;
       object-fit: contain;
       transition: 0.3s;
     }
@@ -364,7 +366,7 @@
     }
 
     .dash-wrap {
-      padding: 32px 24px;
+      padding: 32px 28px;
       max-width: 1280px;
       margin: 0 auto
     }
@@ -576,7 +578,7 @@
     .editor-layout {
       display: flex;
       gap: 12px;
-      padding: 20px 16px;
+      padding: 24px 28px;
       max-width: 900px;
       margin: 0 auto;
     }
@@ -2559,13 +2561,14 @@
       margin-top: 6px;
       margin-bottom: 6px;
       transition: all 0.2s ease;
+      width: 100%;
     }
     .slug-input-group:focus-within {
       border-color: var(--accent);
       box-shadow: 0 0 12px rgba(77, 166, 255, 0.3);
     }
     .slug-prefix {
-      padding: 10px 12px;
+      padding: 9px 12px;
       background: rgba(255, 255, 255, 0.05);
       border-right: 1px solid var(--border);
       font-size: 13px;
@@ -2573,6 +2576,13 @@
       white-space: nowrap;
       user-select: none;
       font-family: inherit;
+      flex-shrink: 0;
+    }
+    .slug-input-row {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
     }
     .slug-input-field {
       flex: 1;
@@ -2580,8 +2590,8 @@
       border: none !important;
       outline: none !important;
       color: #fff !important;
-      padding: 10px 12px;
-      font-size: 14px;
+      padding: 9px 12px;
+      font-size: 13px;
       font-family: inherit;
       min-width: 0;
     }
@@ -2590,7 +2600,7 @@
       border: none;
       border-left: 1px solid var(--border);
       color: var(--text);
-      padding: 10px 14px;
+      padding: 9px 12px;
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
@@ -2600,10 +2610,18 @@
       transition: background 0.2s;
       font-family: inherit;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .slug-action-btn:hover {
       background: rgba(77, 166, 255, 0.25);
       color: #fff;
+    }
+    .slug-gen-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-top: 6px;
     }
     .slug-status {
       font-size: 12px;
@@ -2623,18 +2641,28 @@
       gap: 8px;
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 10px;
       margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .shorturl-active-box input {
       flex: 1;
+      min-width: 0;
       background: transparent;
       border: none;
       color: #10b981;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       outline: none;
+      text-overflow: ellipsis;
+    }
+    .shorturl-active-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .deploy-status-box {
       background: rgba(245, 158, 11, 0.12);
@@ -2674,10 +2702,10 @@
 
     /* ── Large Tablets / Small Desktops (≤1024px) ── */
     @media (max-width: 1024px) {
-      .dash-wrap { padding: 24px 16px; }
+      .dash-wrap { padding: 24px 20px; }
       .dash-hero { padding: 28px 24px; }
       .forms-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-      .editor-layout { padding: 16px 12px; max-width: 100%; }
+      .editor-layout { padding: 16px 16px; max-width: 100%; }
       .resp-main-card { padding: 20px 18px; }
       .resp-header-row { flex-wrap: wrap; gap: 10px; }
       .resp-actions-group { flex-wrap: wrap; gap: 6px; }
@@ -2688,9 +2716,9 @@
     /* ── Tablets (≤768px) ── */
     @media (max-width: 768px) {
       /* Header */
-      .app-header { padding: 8px 12px; height: 56px; gap: 4px; }
-      .logo-kct  { height: 42px; }
-      .logo-seds { height: 50px; }
+      .app-header { padding: 8px 14px; height: 58px; gap: 4px; }
+      .logo-kct  { height: 46px; }
+      .logo-seds { height: 54px; }
       .brand-label { display: none; }
       .header-title { font-size: 13px; margin: 0 6px; max-width: 180px; }
       .header-actions { gap: 2px; }
@@ -2702,14 +2730,14 @@
       .tab-btn { padding: 12px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
 
       /* Dashboard */
-      .dash-wrap { padding: 18px 12px; }
+      .dash-wrap { padding: 18px 16px; }
       .dash-hero { padding: 22px 18px; flex-direction: column; align-items: flex-start; }
       .dash-hero h1 { font-size: 22px; }
       .forms-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
       .new-card { padding: 28px 20px; min-height: 140px; }
 
       /* Editor — stack vertically, move right-toolbar to bottom bar */
-      .editor-layout { flex-direction: column; padding: 10px; gap: 10px; }
+      .editor-layout { flex-direction: column; padding: 12px 16px; gap: 10px; }
       .builder-area { width: 100%; min-width: 0; }
       .right-toolbar {
         position: static;
@@ -2745,7 +2773,7 @@
       #respMoreMenu { right: auto; left: 0; }
 
       /* Settings */
-      .settings-wrap { padding: 16px 12px; }
+      .settings-wrap { padding: 16px 16px; }
       .settings-section { padding: 18px 14px; }
       .settings-row { flex-direction: column; gap: 10px; }
 
@@ -2760,14 +2788,49 @@
 
     /* ── Mobile (≤600px) ── */
     @media (max-width: 600px) {
-      /* Header */
-      .app-header { padding: 5px 8px; height: 50px; gap: 3px; }
-      .logo-kct  { height: 34px; }
-      .logo-seds { height: 42px; }
-      .left-header { gap: 8px; }
-      .header-title { display: none; }           /* hide title input on mobile — saves space */
-      .icon-btn  { width: 32px; height: 32px; }
-      .icon-btn .material-icons-round { font-size: 18px; }
+      /* Header: two-row layout — Row 1: logos, Row 2: action buttons */
+      .app-header {
+        flex-direction: column;
+        height: auto;
+        padding: 10px 14px;
+        gap: 6px;
+        align-items: stretch;
+      }
+      /* Row 1: left-header spans full width, SEDS logo pushed to far right */
+      .left-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        order: 1;
+      }
+      /* Move SEDS logo inside left-header row using absolute position */
+      .header-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        order: 2;
+        gap: 4px;
+        margin-left: 0;
+      }
+      /* Hide SEDS logo from header-actions (it will be shown via left-header::after trick) */
+      .header-actions > a[title="SEDS Home"] {
+        display: none;
+      }
+      /* Show SEDS logo at far right of left-header using sibling from outside */
+      .left-header::after {
+        content: '';
+        display: block;
+      }
+      /* Keep left logo normal */
+      .logo-kct { height: 48px; }
+      .logo-seds { height: 56px; }
+      .header-title { display: none; }
+      .icon-btn { width: 34px; height: 34px; }
+      .icon-btn .material-icons-round { font-size: 19px; }
+      .btn-primary { padding: 7px 14px; font-size: 12px; }
 
       /* Tabs */
       .tabs-bar { top: 44px; }
@@ -2775,7 +2838,7 @@
       .tab-badge { font-size: 9px; min-width: 15px; height: 15px; }
 
       /* Dashboard */
-      .dash-wrap { padding: 10px 8px; }
+      .dash-wrap { padding: 12px 16px; }
       .dash-hero { padding: 16px 12px; border-radius: 14px; gap: 12px; }
       .dash-hero h1 { font-size: 18px; }
       .dash-hero p { font-size: 12px; }
@@ -2785,7 +2848,7 @@
       .setup-banner { flex-direction: column; align-items: flex-start; font-size: 12px; padding: 12px; }
 
       /* Editor */
-      .editor-layout { padding: 6px 4px; gap: 8px; }
+      .editor-layout { padding: 8px 16px; gap: 8px; }
       .form-title-card { padding: 18px 12px; border-radius: 12px; }
       .ft-input { font-size: 18px; }
       .fd-input { font-size: 13px; }
@@ -2827,7 +2890,7 @@
       .chart-bar-label { font-size: 11px; }
 
       /* Settings */
-      .settings-wrap { padding: 8px 6px; }
+      .settings-wrap { padding: 10px 14px; }
       .settings-section { padding: 12px 10px; border-radius: 12px; }
       .settings-section h3 { font-size: 14px; }
       .settings-row { flex-direction: column; gap: 8px; }
@@ -2835,6 +2898,80 @@
 
       /* Toast */
       .toast { right: 8px; bottom: 8px; left: 8px; min-width: unset; width: auto; font-size: 13px; border-radius: 10px; }
+
+      /* Short URL / Share Modal responsive */
+      .shorturl-card { padding: 12px 10px; }
+      .slug-input-group {
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: 10px;
+      }
+      .slug-prefix {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 6px 10px;
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+      }
+      .slug-input-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .slug-input-field {
+        padding: 8px 10px;
+        font-size: 13px;
+        flex: 1;
+        min-width: 0;
+      }
+      .slug-action-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+      .slug-gen-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .slug-gen-row .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+      .shorturl-active-box {
+        flex-wrap: wrap;
+        padding: 10px 10px;
+        gap: 8px;
+      }
+      .shorturl-active-box input {
+        width: 100%;
+        flex: 1 1 100%;
+        font-size: 12px;
+        padding: 2px 0;
+      }
+      .shorturl-active-actions {
+        width: 100%;
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+      }
+      .shorturl-active-actions .copy-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+      }
+      .link-box {
+        padding: 8px 10px;
+      }
+      .link-box input {
+        font-size: 11px;
+      }
+      .link-box .copy-btn {
+        flex-shrink: 0;
+        padding: 6px 10px;
+        font-size: 11px;
+      }
 
       /* Auth modal */
       .modal-box { padding: 18px 12px !important; }
@@ -2872,6 +3009,9 @@
         <img class="logo-kct" src="kumaraguru.png" alt="Kumaraguru Institutions" onerror="this.style.display='none'">
       </a>
       <span class="brand-label">Forms</span>
+      <a href="index.html" title="SEDS Home" style="margin-left:auto;display:flex;align-items:center">
+        <img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'">
+      </a>
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="loadAllFormsFromCloud(true)" title="Sync all forms from Google Drive">
@@ -2886,9 +3026,6 @@
       <a href="index.html" class="icon-btn" title="Go to SEDS site">
         <span class="material-icons-round">home</span>
       </a>
-      <a href="index.html" title="SEDS Home" style="display:flex;align-items:center;margin-left:8px">
-        <img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'">
-      </a>
     </div>
   </header>
 
@@ -2899,6 +3036,9 @@
     <div class="left-header">
       <a href="#" onclick="goToDashboard();return false" title="Back to Dashboard">
         <img class="logo-kct" src="kumaraguru.png" alt="Kumaraguru Institutions" onerror="this.style.display='none'">
+      </a>
+      <a href="index.html" title="SEDS Home" style="margin-left:auto;display:flex;align-items:center">
+        <img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'">
       </a>
     </div>
     <input type="text" id="headerTitle" class="header-title" placeholder="Untitled form"
@@ -2923,9 +3063,6 @@
       <button class="icon-btn" onclick="adminLogout()" title="Log out from Admin">
         <span class="material-icons-round">lock</span>
       </button>
-      <a href="index.html" title="SEDS Home" style="display:flex;align-items:center;margin-left:8px">
-        <img class="logo-seds" src="SEDS.png" alt="SEDS Logo" onerror="this.style.display='none'">
-      </a>
     </div>
   </header>
 
@@ -3330,14 +3467,16 @@
         <div id="activeShortLinkArea" class="hidden">
           <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Active Custom Short Link:</div>
           <div class="shorturl-active-box">
-            <span class="material-icons-round" style="color:#10b981;font-size:18px">check_circle</span>
+            <span class="material-icons-round" style="color:#10b981;font-size:18px;flex-shrink:0">check_circle</span>
             <input type="text" id="activeShortUrlVal" readonly>
-            <button type="button" class="copy-btn" onclick="copyField('activeShortUrlVal','Short link')" style="padding:6px 12px;background:#10b981">
-              <span class="material-icons-round" style="font-size:15px">content_copy</span> Copy
-            </button>
-            <button type="button" class="copy-btn" onclick="openActiveShortUrl()" style="padding:6px 12px;background:rgba(255,255,255,0.1)">
-              <span class="material-icons-round" style="font-size:15px">open_in_new</span> Open
-            </button>
+            <div class="shorturl-active-actions">
+              <button type="button" class="copy-btn" onclick="copyField('activeShortUrlVal','Short link')" style="padding:6px 12px;background:#10b981">
+                <span class="material-icons-round" style="font-size:15px">content_copy</span> Copy
+              </button>
+              <button type="button" class="copy-btn" onclick="openActiveShortUrl()" style="padding:6px 12px;background:rgba(255,255,255,0.15)">
+                <span class="material-icons-round" style="font-size:15px">open_in_new</span> Open
+              </button>
+            </div>
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:8px">
             <button type="button" class="btn-ghost" onclick="toggleShortLinkCreator(true)" style="padding:4px 10px;font-size:11px;border-radius:6px">
@@ -3351,17 +3490,19 @@
           <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:2px">Create a Custom Short Link:</div>
           <div class="slug-input-group">
             <div class="slug-prefix">forms.kumaraguruseds.space/</div>
-            <input type="text" id="shareSlugInput" class="slug-input-field" placeholder="custom-slug" pattern="^[a-zA-Z0-9_\-\/]+$" oninput="onShareSlugInput(this.value)">
-            <button type="button" class="slug-action-btn" onclick="generateRandomSlug()" title="Generate clean slug">
-              <span class="material-icons-round" style="font-size:15px">auto_awesome</span> Auto
-            </button>
+            <div class="slug-input-row">
+              <input type="text" id="shareSlugInput" class="slug-input-field" placeholder="custom-slug" pattern="^[a-zA-Z0-9_\-\/]+$" oninput="onShareSlugInput(this.value)">
+              <button type="button" class="slug-action-btn" onclick="generateRandomSlug()" title="Generate clean slug">
+                <span class="material-icons-round" style="font-size:15px">auto_awesome</span> Auto
+              </button>
+            </div>
           </div>
           <div id="slugValidationMsg" class="slug-status">
             <span class="material-icons-round" style="font-size:14px;color:var(--muted)">info</span>
             <span style="color:var(--muted)">Enter a unique slug (e.g. seds-event, feedback)</span>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:6px">
+          <div class="slug-gen-row">
             <input type="email" id="shareEmailInput" class="text-inp" placeholder="Admin email for notification (optional)" style="font-size:12px;padding:8px 12px">
             <button type="button" id="createShortLinkBtn" class="btn-primary" onclick="createFormShortLink()" style="padding:8px 14px;font-size:12px;white-space:nowrap;background:linear-gradient(135deg,#0072ff,#00c6ff)">
               <span class="material-icons-round" style="font-size:16px">rocket_launch</span> Generate Link
@@ -4140,9 +4281,29 @@
     // =========================================================
     const getRespUrl  = id => `${BASE}view-form.html?id=${id}`;
     const getAdminUrl = (id, tk) => `${BASE}index.html?id=${id}&token=${encodeURIComponent(tk)}`;
-    // Share proxy URL: routes through Apps Script so WhatsApp/social crawlers
-    // get proper OG thumbnail (form header image) + then redirect to view-form.html
+    // OG share proxy helper — falls back to plain URL if GAS not configured
     const getShareProxyUrl = id => GAS_URL ? `${GAS_URL}?action=share&formId=${encodeURIComponent(id)}` : getRespUrl(id);
+
+    // Publish a static OG page for a form so social crawlers see correct thumbnail.
+    // Calls Code.gs publishOgPage → commits f/<formId>.html to GitHub.
+    // Falls back gracefully (returns null) if GITHUB_TOKEN not set or call fails.
+    async function publishOgPageForForm(form) {
+      if (!GAS_URL || !form?.id) return null;
+      try {
+        const res = await gasPost({ action: 'publishOgPage', formId: form.id, form: form });
+        if (res?.success && res.ogUrl) {
+          form.ogUrl = res.ogUrl;  // cache on form object
+          // Persist to local storage
+          const all = JSON.parse(localStorage.getItem(FORMS_KEY) || '{}');
+          if (all[form.id]) all[form.id].ogUrl = res.ogUrl;
+          localStorage.setItem(FORMS_KEY, JSON.stringify(all));
+          return res.ogUrl;
+        }
+      } catch (e) {
+        console.warn('publishOgPage failed (GITHUB_TOKEN may not be set):', e);
+      }
+      return null;
+    }
 
     // =========================================================
     //  CREATE / OPEN FORM
@@ -5232,9 +5393,9 @@
 
     function showShareDialog() {
       const f = curForm(); if (!f) return;
-      // Use GAS share proxy URL for the respondent link so WhatsApp/social crawlers
-      // see the correct form OG thumbnail (form header image)
-      document.getElementById('respLinkInput').value = getShareProxyUrl(f.id);
+      // Use clean custom-domain respondent URL (not GAS proxy)
+      const respUrl = f.ogUrl || getRespUrl(f.id);
+      document.getElementById('respLinkInput').value = respUrl;
       document.getElementById('adminLinkInput').value = getAdminUrl(f.id, f.adminToken);
       document.getElementById('shareStatusMsg').innerHTML = f.published
         ? `<span style="color:var(--success)">✅ Form is published and accepting responses.</span>`
@@ -5260,6 +5421,16 @@
         }
       }
       openModal('shareModal');
+
+      // Background: publish OG page to GitHub so WhatsApp shows real form thumbnail
+      if (GAS_URL && !f.ogUrl) {
+        publishOgPageForForm(f).then(ogUrl => {
+          if (ogUrl) {
+            const inp = document.getElementById('respLinkInput');
+            if (inp && inp.value === getRespUrl(f.id)) inp.value = ogUrl;
+          }
+        });
+      }
     }
 
     function toggleShortLinkCreator(show) {
@@ -5352,9 +5523,8 @@
 
       const slug = (slugInput?.value || '').trim();
       const email = (emailInput?.value || '').trim();
-      // Use the GAS share proxy URL as the link destination — this way WhatsApp
-      // crawls the proxy and gets proper form OG thumbnail before redirecting
-      const longUrl = getShareProxyUrl(f.id);
+      // Use clean custom-domain URL as the destination
+      const longUrl = curForm()?.ogUrl || getRespUrl(curForm()?.id || '');
 
       if (!slug || slug.length < 3 || !/^[a-zA-Z0-9_\-\/]+$/.test(slug)) {
         toast('Please enter a valid slug (min 3 characters, a-z, 0-9, -)', 'error');

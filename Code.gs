@@ -126,6 +126,7 @@ function doPost(e) {
       case 'getAllLinks':    return jsonResp(getAllLinks());
       case 'createShortUrl':
       case 'shortenUrl':     return jsonResp(createShortUrl(body));
+      case 'publishOgPage':  return jsonResp(publishOgPage(body));
       case 'ping':           return jsonResp({ status: 'ok', ts: new Date().toISOString() });
       default:               return jsonResp({ error: 'Unknown action: ' + action });
     }
@@ -873,20 +874,12 @@ function createShortUrl(body) {
   }
 }
 
-function syncShortLinksToGitHub() {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  var token = scriptProperties.getProperty('GITHUB_TOKEN');
-  if (!token) return; // Silent return if not configured in Script Properties
-
-  var sheet = getLinksSheet();
-  var data = sheet.getDataRange().getValues();
-  var links = {};
-  for (var i = 1; i < data.length; i++) {
-    var s = data[i][1];
-    var u = data[i][0];
-    if (s && u) links[String(s).trim()] = String(u).trim();
-  }
-  var jsonContent = JSON.stringify(links, null, 2);
+// ============================================================
+//  GITHUB FILE HELPER — Generic PUT to GitHub Contents API
+// ============================================================
+function githubPutFile(path, base64Content, commitMessage) {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_TOKEN not set in Script Properties. Add it at: Apps Script > Project Settings > Script Properties');
 
   var apiBase = 'https://api.github.com/repos/' + CONFIG.GITHUB_USERNAME + '/' + CONFIG.GITHUB_REPO + '/contents/';
   var headers = {
@@ -895,28 +888,145 @@ function syncShortLinksToGitHub() {
     'X-GitHub-Api-Version': '2022-11-28'
   };
 
-  var getRes = UrlFetchApp.fetch(apiBase + CONFIG.GITHUB_FILE_PATH + '?ref=' + CONFIG.GITHUB_BRANCH + '&t=' + Date.now(), {
+  // GET current SHA (needed if file already exists)
+  var sha = null;
+  var getRes = UrlFetchApp.fetch(apiBase + path + '?ref=' + CONFIG.GITHUB_BRANCH + '&t=' + Date.now(), {
     method: 'GET', headers: headers, muteHttpExceptions: true
   });
-  var currentSha = null;
   if (getRes.getResponseCode() === 200) {
-    currentSha = JSON.parse(getRes.getContentText()).sha;
+    sha = JSON.parse(getRes.getContentText()).sha;
   }
 
-  var payload = {
-    message: 'Sync short links from SEDS Forms - ' + new Date().toISOString(),
-    content: Utilities.base64Encode(jsonContent, Utilities.Charset.UTF_8),
-    branch: CONFIG.GITHUB_BRANCH,
-    sha: currentSha
-  };
+  var payload = { message: commitMessage, content: base64Content, branch: CONFIG.GITHUB_BRANCH };
+  if (sha) payload.sha = sha;
 
-  UrlFetchApp.fetch(apiBase + CONFIG.GITHUB_FILE_PATH, {
+  var putRes = UrlFetchApp.fetch(apiBase + path, {
     method: 'PUT',
     headers: headers,
     contentType: 'application/json',
     payload: JSON.stringify(payload),
     muteHttpExceptions: true
   });
+  var code = putRes.getResponseCode();
+  if (code !== 200 && code !== 201) {
+    throw new Error('GitHub API error ' + code + ': ' + putRes.getContentText().substring(0, 200));
+  }
+  return JSON.parse(putRes.getContentText());
+}
+
+// ============================================================
+//  PUBLISH OG PAGE — Commits static HTML with OG meta tags to
+//  GitHub at f/<formId>.html so WhatsApp/Telegram/Twitter see
+//  the real form title + header image as the link thumbnail.
+// ============================================================
+function publishOgPage(body) {
+  var formId = String(body.formId || '').trim();
+  if (!formId) return { success: false, error: 'formId required' };
+
+  // Check GITHUB_TOKEN upfront — give clear feedback
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) {
+    return {
+      success: false,
+      warning: 'GITHUB_TOKEN not configured. To enable WhatsApp thumbnail preview, add GITHUB_TOKEN (repo contents:write scope) in Apps Script > Project Settings > Script Properties.',
+      fallbackUrl: CONFIG.BASE_URL + 'view-form.html?id=' + encodeURIComponent(formId)
+    };
+  }
+
+  try {
+    // 1. Load form definition
+    var formData = body.form || getForm(formId);
+    if (!formData || formData.error) return { success: false, error: 'Form not found: ' + formId };
+
+    var title    = (formData.title && formData.title !== 'Untitled form') ? formData.title : 'SEDS Form';
+    var desc     = formData.description || 'Fill out this form from Kumaraguru SEDS.';
+    var viewUrl  = CONFIG.BASE_URL + 'view-form.html?id=' + encodeURIComponent(formId);
+    var imgUrl   = CONFIG.BASE_URL + 'sedsb.png';  // default fallback
+
+    // 2. Handle header image: if base64 data URI, commit as static file
+    var rawImg = formData.headerImage || formData.titleImage || formData.bannerImage || '';
+    if (rawImg && rawImg.startsWith('data:')) {
+      try {
+        // Parse: data:<mime>;base64,<data>
+        var mimeMatch = rawImg.match(/^data:([^;]+);base64,/);
+        var mime      = mimeMatch ? mimeMatch[1] : 'image/png';
+        var ext       = mime === 'image/jpeg' ? 'jpg' : mime === 'image/webp' ? 'webp' : mime === 'image/gif' ? 'gif' : 'png';
+        var b64Data   = rawImg.replace(/^data:[^;]+;base64,/, '');
+        var imgPath   = 'f/img/' + formId + '.' + ext;
+
+        githubPutFile(imgPath, b64Data, 'Add OG header image for form ' + formId);
+        imgUrl = CONFIG.BASE_URL + imgPath;
+      } catch (imgErr) {
+        Logger.log('publishOgPage: image commit failed: ' + imgErr.toString());
+        // Fall back to sedsb.png
+      }
+    } else if (rawImg && rawImg.startsWith('http')) {
+      imgUrl = rawImg;  // already a public URL
+    }
+
+    // 3. Build the static OG HTML page
+    var safe = function(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var safeTitle = safe(title + ' — Kumaraguru SEDS');
+    var safeDesc  = safe(desc);
+
+    var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+      '<meta charset="UTF-8">\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+      '<title>' + safeTitle + '</title>\n' +
+      '<meta name="description" content="' + safeDesc + '">\n' +
+      '<!-- Open Graph -->\n' +
+      '<meta property="og:type" content="website">\n' +
+      '<meta property="og:title" content="' + safeTitle + '">\n' +
+      '<meta property="og:description" content="' + safeDesc + '">\n' +
+      '<meta property="og:image" content="' + imgUrl + '">\n' +
+      '<meta property="og:image:width" content="1200">\n' +
+      '<meta property="og:image:height" content="630">\n' +
+      '<meta property="og:url" content="' + viewUrl + '">\n' +
+      '<meta property="og:site_name" content="Kumaraguru SEDS">\n' +
+      '<!-- Twitter Card -->\n' +
+      '<meta name="twitter:card" content="summary_large_image">\n' +
+      '<meta name="twitter:title" content="' + safeTitle + '">\n' +
+      '<meta name="twitter:description" content="' + safeDesc + '">\n' +
+      '<meta name="twitter:image" content="' + imgUrl + '">\n' +
+      '<link rel="icon" href="' + CONFIG.BASE_URL + 'SEDS.png" type="image/png">\n' +
+      '<link rel="canonical" href="' + viewUrl + '">\n' +
+      '<meta http-equiv="refresh" content="0; url=' + viewUrl + '">\n' +
+      '</head>\n<body style="background:#070f1e;color:#8da4c4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0">\n' +
+      '<p>Redirecting to <a href="' + viewUrl + '" style="color:#4da6ff">' + safeTitle + '</a>...</p>\n' +
+      '<script>window.location.replace(' + JSON.stringify(viewUrl) + ');</script>\n' +
+      '</body>\n</html>';
+
+    // 4. Commit the HTML page to f/<formId>.html
+    var htmlPath = 'f/' + formId + '.html';
+    var b64Html  = Utilities.base64Encode(html, Utilities.Charset.UTF_8);
+    githubPutFile(htmlPath, b64Html, 'Publish OG share page for form ' + formId + ' \u2014 ' + title);
+
+    var ogUrl = CONFIG.BASE_URL + htmlPath;
+    Logger.log('publishOgPage: committed ' + htmlPath + ' (img: ' + imgUrl + ')');
+    return { success: true, ogUrl: ogUrl, imgUrl: imgUrl, formId: formId };
+
+  } catch (err) {
+    Logger.log('publishOgPage error: ' + err.toString());
+    return { success: false, error: err.toString() };
+  }
+}
+
+function syncShortLinksToGitHub() {
+  try {
+    var sheet = getLinksSheet();
+    var data = sheet.getDataRange().getValues();
+    var links = {};
+    for (var i = 1; i < data.length; i++) {
+      var s = data[i][1];
+      var u = data[i][0];
+      if (s && u) links[String(s).trim()] = String(u).trim();
+    }
+    var jsonContent = JSON.stringify(links, null, 2);
+    var b64 = Utilities.base64Encode(jsonContent, Utilities.Charset.UTF_8);
+    githubPutFile(CONFIG.GITHUB_FILE_PATH, b64, 'Sync short links from SEDS Forms - ' + new Date().toISOString());
+  } catch (e) {
+    Logger.log('syncShortLinksToGitHub: ' + e.toString());
+  }
 }
 
 function sendShortLinkNotification(longUrl, slug, shortUrl, userEmail) {
