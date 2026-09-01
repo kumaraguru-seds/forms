@@ -6,7 +6,7 @@
 
 window.SEDS_CONFIG = {
   // Google Apps Script Web App Deployment URL
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbw12wUIO8ST1gvwHIN61TV8PdHuYRP02_VJbr9PG9aic1KLQW8Qfh4Ikw5e3wPnAYVl/exec',
 
   // Custom Domain Base URL
   CUSTOM_DOMAIN_BASE: 'https://forms.kumaraguruseds.space/',

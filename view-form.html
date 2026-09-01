@@ -7,8 +7,8 @@
   <title>Form — Kumaraguru SEDS</title>
   <meta name="title" content="Form — Kumaraguru SEDS">
   <meta name="description" content="Fill out this form from Kumaraguru SEDS.">
-  <link rel="icon" href="SEDS.png" type="image/png">
-  <link rel="apple-touch-icon" href="SEDS.png">
+  <link rel="icon" href="sedsb.png" type="image/png">
+  <link rel="apple-touch-icon" href="sedsb.png">
 
   <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
   <meta property="og:type" content="website">
@@ -690,9 +690,13 @@
 // =========================================================
 const GAS_KEY         = window.SEDS_CONFIG?.GAS_KEY || 'seds_gas_url';
 const FORMS_KEY       = window.SEDS_CONFIG?.FORMS_KEY || 'seds_forms_v2';
-const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
+const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbw12wUIO8ST1gvwHIN61TV8PdHuYRP02_VJbr9PG9aic1KLQW8Qfh4Ikw5e3wPnAYVl/exec';
 
-let GAS_URL = (window.getSedsGasUrl ? window.getSedsGasUrl() : null) || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+// Prioritize window.SEDS_CONFIG.GAS_URL (from config.js) and sync to localStorage
+let GAS_URL = window.SEDS_CONFIG?.GAS_URL || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+if (window.SEDS_CONFIG?.GAS_URL && localStorage.getItem(GAS_KEY) !== window.SEDS_CONFIG.GAS_URL) {
+  localStorage.setItem(GAS_KEY, window.SEDS_CONFIG.GAS_URL);
+}
 
 // =========================================================
 //  STATE

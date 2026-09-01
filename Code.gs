@@ -10,7 +10,7 @@ var CONFIG = {
   RESPONSES_FOLDER: 'FormResponses',
   ADMIN_EMAILS:     ['maniluna07@gmail.com', 'manikandan9344752075@gmail.com'],
   ADMIN_PASSWORD:   'SEDS@Admin2026',          // Admin login password
-  SEDS_LOGO_URL:    'https://kumaraguruseds.space/SEDS.png',
+  SEDS_LOGO_URL:    'https://kumaraguruseds.space/sedsb.png',
   SEDS_NAME:        'Kumaraguru SEDS',
   BASE_URL:         'https://forms.kumaraguruseds.space/',
   SHORT_DOMAIN_BASE:'https://forms.kumaraguruseds.space/',
@@ -81,6 +81,7 @@ function doGet(e) {
       case 'getLink':      return jsonResp(lookupSlug(slug));
       case 'getAllLinks':  return jsonResp(getAllLinks());
       case 'deleteForm':   return jsonResp(deleteForm(param));
+      case 'listDeletedForms': return jsonResp(listDeletedForms());
       case 'ping':         return jsonResp({ status: 'ok', ts: new Date().toISOString() });
       case 'share':        return serveFormSharePage(formId, param.slug);
       case 'formMeta':     return jsonResp(getFormMeta(formId));
@@ -110,25 +111,28 @@ function doPost(e) {
     }
 
     switch (action) {
-      case 'verifyAdmin':    return jsonResp(verifyAdmin(body));
-      case 'getAllForms':    return jsonResp(listAllForms());
-      case 'listForms':      return jsonResp(listAllForms());
-      case 'getForm':        return jsonResp(getForm(body.formId || (e && e.parameter ? e.parameter.formId : '')));
-      case 'getResponses':   return jsonResp(getResponses(body.formId || (e && e.parameter ? e.parameter.formId : ''), body.adminToken || (e && e.parameter ? e.parameter.adminToken : '')));
-      case 'saveForm':       return jsonResp(saveForm(body.form));
-      case 'submitResponse': return jsonResp(submitResponse(body));
-      case 'uploadFile':     return jsonResp(uploadFile(body));
-      case 'deleteForm':     return jsonResp(deleteForm(body));
-      case 'notifyAdmins':   return jsonResp(notifyAdmins(body));
-      case 'checkSlug':      return jsonResp(checkSlugAvailability(body.slug || (e && e.parameter ? e.parameter.slug : '')));
+      case 'verifyAdmin':         return jsonResp(verifyAdmin(body));
+      case 'getAllForms':          return jsonResp(listAllForms());
+      case 'listForms':            return jsonResp(listAllForms());
+      case 'getForm':              return jsonResp(getForm(body.formId || (e && e.parameter ? e.parameter.formId : '')));
+      case 'getResponses':         return jsonResp(getResponses(body.formId || (e && e.parameter ? e.parameter.formId : ''), body.adminToken || (e && e.parameter ? e.parameter.adminToken : '')));
+      case 'saveForm':             return jsonResp(saveForm(body.form));
+      case 'submitResponse':       return jsonResp(submitResponse(body));
+      case 'uploadFile':           return jsonResp(uploadFile(body));
+      case 'deleteForm':           return jsonResp(deleteForm(body));
+      case 'listDeletedForms':     return jsonResp(listDeletedForms());
+      case 'restoreForm':          return jsonResp(restoreForm(body));
+      case 'permanentlyDeleteForm':return jsonResp(permanentlyDeleteForm(body));
+      case 'notifyAdmins':         return jsonResp(notifyAdmins(body));
+      case 'checkSlug':            return jsonResp(checkSlugAvailability(body.slug || (e && e.parameter ? e.parameter.slug : '')));
       case 'lookupSlug':
-      case 'getLink':        return jsonResp(lookupSlug(body.slug || (e && e.parameter ? e.parameter.slug : '')));
-      case 'getAllLinks':    return jsonResp(getAllLinks());
+      case 'getLink':              return jsonResp(lookupSlug(body.slug || (e && e.parameter ? e.parameter.slug : '')));
+      case 'getAllLinks':          return jsonResp(getAllLinks());
       case 'createShortUrl':
-      case 'shortenUrl':     return jsonResp(createShortUrl(body));
-      case 'publishOgPage':  return jsonResp(publishOgPage(body));
-      case 'ping':           return jsonResp({ status: 'ok', ts: new Date().toISOString() });
-      default:               return jsonResp({ error: 'Unknown action: ' + action });
+      case 'shortenUrl':           return jsonResp(createShortUrl(body));
+      case 'publishOgPage':        return jsonResp(publishOgPage(body));
+      case 'ping':                 return jsonResp({ status: 'ok', ts: new Date().toISOString() });
+      default:                     return jsonResp({ error: 'Unknown action: ' + action });
     }
   } catch (err) {
     return jsonResp({ error: err.toString() });
@@ -294,21 +298,200 @@ function saveForm(form) {
   return { success: true, formId: form.id };
 }
 
+// ============================================================
+//  DELETED FORMS FOLDER NAME
+// ============================================================
+var DELETED_FORMS_FOLDER = 'DeletedForms';
+
 function deleteForm(body) {
   var formId = String(body.formId || '').trim();
   if (!formId) return { success: false, error: 'formId is required' };
+  var githubResult = null;
   try {
     var folder = getFolder(rootFolder(), CONFIG.FORMS_FOLDER);
     var it = folder.getFilesByName(formId + '.json');
-    var deletedCount = 0;
-    while (it.hasNext()) {
-      var file = it.next();
-      file.setTrashed(true);
-      deletedCount++;
+    var movedCount = 0;
+
+    if (it.hasNext()) {
+      // Soft-delete: move to DeletedForms folder instead of trashing
+      var delFolder = getFolder(rootFolder(), DELETED_FORMS_FOLDER);
+      while (it.hasNext()) {
+        var file = it.next();
+        // Stamp deletedAt into JSON so the trash view can show it
+        try {
+          var data = JSON.parse(file.getBlob().getDataAsString());
+          data._deletedAt = new Date().toISOString();
+          file.setContent(JSON.stringify(data));
+        } catch (e) {}
+        file.moveTo(delFolder);
+        movedCount++;
+      }
     }
-    return { success: true, formId: formId, count: deletedCount, message: 'Form deleted from cloud' };
+
+    // Delete the OG share page from GitHub (f/<formId>.html)
+    try {
+      githubResult = githubDeleteFile('f/' + formId + '.html', 'Delete OG share page for form ' + formId);
+    } catch (ghErr) {
+      Logger.log('deleteForm: GitHub OG page deletion notice: ' + ghErr.toString());
+      githubResult = { skipped: true, reason: ghErr.toString() };
+    }
+
+    return {
+      success: true,
+      formId: formId,
+      count: movedCount,
+      message: 'Form moved to trash (restorable)',
+      github: githubResult
+    };
   } catch (err) {
     Logger.log('deleteForm error: ' + err.toString());
+    return { success: false, error: err.toString() };
+  }
+}
+
+// ============================================================
+//  LIST DELETED FORMS (Trash bin)
+// ============================================================
+function listDeletedForms() {
+  try {
+    var rf = rootFolder();
+    var it = rf.getFoldersByName(DELETED_FORMS_FOLDER);
+    if (!it.hasNext()) return { success: true, forms: [] };
+    var delFolder = it.next();
+    var files = delFolder.getFiles();
+    var forms = [];
+    while (files.hasNext()) {
+      var file = files.next();
+      if (file.getName().toLowerCase().indexOf('.json') !== -1) {
+        try {
+          var data = JSON.parse(file.getBlob().getDataAsString());
+          if (data && data.id) {
+            // Include fileId so we can locate it for restore/permanent delete
+            forms.push({
+              id: data.id,
+              title: data.title || 'Untitled form',
+              description: data.description || '',
+              adminToken: data.adminToken || '',
+              deletedAt: data._deletedAt || null,
+              questionCount: (data.questions || []).length,
+              published: !!data.published,
+              driveFileId: file.getId()
+            });
+          }
+        } catch (e) {}
+      }
+    }
+    // Sort newest deletion first
+    forms.sort(function(a, b) {
+      return (b.deletedAt || '') > (a.deletedAt || '') ? 1 : -1;
+    });
+    return { success: true, forms: forms };
+  } catch (err) {
+    return { success: false, error: err.toString(), forms: [] };
+  }
+}
+
+// ============================================================
+//  RESTORE FORM (from Trash back to FormDefinitions)
+// ============================================================
+function restoreForm(body) {
+  var formId = String(body.formId || '').trim();
+  if (!formId) return { success: false, error: 'formId is required' };
+  try {
+    var rf = rootFolder();
+    var delIt = rf.getFoldersByName(DELETED_FORMS_FOLDER);
+    if (!delIt.hasNext()) return { success: false, error: 'No DeletedForms folder found' };
+    var delFolder = delIt.next();
+
+    var it = delFolder.getFilesByName(formId + '.json');
+    if (!it.hasNext()) return { success: false, error: 'Deleted form not found: ' + formId };
+
+    var formFolder = getFolder(rf, CONFIG.FORMS_FOLDER);
+    var restoredCount = 0;
+    var formData = null;
+
+    while (it.hasNext()) {
+      var file = it.next();
+      try {
+        formData = JSON.parse(file.getBlob().getDataAsString());
+        // Strip the _deletedAt marker
+        delete formData._deletedAt;
+        formData.updatedAt = Date.now();
+        file.setContent(JSON.stringify(formData));
+      } catch (e) {}
+      file.moveTo(formFolder);
+      restoredCount++;
+    }
+
+    // Re-publish the OG share page to GitHub
+    var ogResult = null;
+    if (formData) {
+      try {
+        ogResult = publishOgPage({ formId: formId, form: formData });
+      } catch (e) {
+        Logger.log('restoreForm: re-publish OG notice: ' + e.toString());
+        ogResult = { skipped: true, reason: e.toString() };
+      }
+    }
+
+    return {
+      success: true,
+      formId: formId,
+      count: restoredCount,
+      message: 'Form restored successfully',
+      ogPage: ogResult
+    };
+  } catch (err) {
+    Logger.log('restoreForm error: ' + err.toString());
+    return { success: false, error: err.toString() };
+  }
+}
+
+// ============================================================
+//  PERMANENTLY DELETE FORM (trash from DeletedForms + GitHub)
+// ============================================================
+function permanentlyDeleteForm(body) {
+  var formId = String(body.formId || '').trim();
+  if (!formId) return { success: false, error: 'formId is required' };
+  var githubResult = null;
+  try {
+    var rf = rootFolder();
+    var delIt = rf.getFoldersByName(DELETED_FORMS_FOLDER);
+    var trashedCount = 0;
+
+    if (delIt.hasNext()) {
+      var delFolder = delIt.next();
+      var it = delFolder.getFilesByName(formId + '.json');
+      while (it.hasNext()) {
+        it.next().setTrashed(true);
+        trashedCount++;
+      }
+    }
+
+    // Also check and permanently delete from FormDefinitions (edge case)
+    var fIt = getFolder(rf, CONFIG.FORMS_FOLDER).getFilesByName(formId + '.json');
+    while (fIt.hasNext()) {
+      fIt.next().setTrashed(true);
+      trashedCount++;
+    }
+
+    // Delete OG HTML from GitHub
+    try {
+      githubResult = githubDeleteFile('f/' + formId + '.html', 'Permanently delete OG share page for form ' + formId);
+    } catch (ghErr) {
+      Logger.log('permanentlyDeleteForm: GitHub notice: ' + ghErr.toString());
+      githubResult = { skipped: true, reason: ghErr.toString() };
+    }
+
+    return {
+      success: true,
+      formId: formId,
+      count: trashedCount,
+      message: 'Form permanently deleted',
+      github: githubResult
+    };
+  } catch (err) {
+    Logger.log('permanentlyDeleteForm error: ' + err.toString());
     return { success: false, error: err.toString() };
   }
 }
@@ -912,6 +1095,52 @@ function githubPutFile(path, base64Content, commitMessage) {
     throw new Error('GitHub API error ' + code + ': ' + putRes.getContentText().substring(0, 200));
   }
   return JSON.parse(putRes.getContentText());
+}
+
+// ============================================================
+//  GITHUB FILE HELPER — DELETE a file via GitHub Contents API
+// ============================================================
+function githubDeleteFile(path, commitMessage) {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_TOKEN not set in Script Properties.');
+
+  var apiBase = 'https://api.github.com/repos/' + CONFIG.GITHUB_USERNAME + '/' + CONFIG.GITHUB_REPO + '/contents/';
+  var headers = {
+    'Authorization': 'token ' + token,
+    'Accept': 'application/vnd.github.v3+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+
+  // GET current SHA — file must exist to delete it
+  var getRes = UrlFetchApp.fetch(apiBase + path + '?ref=' + CONFIG.GITHUB_BRANCH + '&t=' + Date.now(), {
+    method: 'GET', headers: headers, muteHttpExceptions: true
+  });
+  if (getRes.getResponseCode() === 404) {
+    // File already gone — treat as success
+    return { deleted: false, skipped: true, reason: 'File not found on GitHub (already deleted or never published)' };
+  }
+  if (getRes.getResponseCode() !== 200) {
+    throw new Error('GitHub GET error ' + getRes.getResponseCode() + ': ' + getRes.getContentText().substring(0, 200));
+  }
+
+  var sha = JSON.parse(getRes.getContentText()).sha;
+
+  var payload = { message: commitMessage, sha: sha, branch: CONFIG.GITHUB_BRANCH };
+
+  var delRes = UrlFetchApp.fetch(apiBase + path, {
+    method: 'DELETE',
+    headers: headers,
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = delRes.getResponseCode();
+  if (code !== 200 && code !== 204) {
+    throw new Error('GitHub DELETE error ' + code + ': ' + delRes.getContentText().substring(0, 200));
+  }
+
+  Logger.log('githubDeleteFile: deleted ' + path + ' from GitHub');
+  return { deleted: true, path: path };
 }
 
 // ============================================================

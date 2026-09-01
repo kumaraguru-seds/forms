@@ -9,8 +9,8 @@
   <meta name="title" content="SEDS Forms — Kumaraguru SEDS">
   <meta name="description" content="Kumaraguru SEDS Forms Builder — Create and manage forms for Kumaraguru SEDS events.">
   <meta name="author" content="Kumaraguru SEDS">
-  <link rel="icon" href="SEDS.png" type="image/png">
-  <link rel="apple-touch-icon" href="SEDS.png">
+  <link rel="icon" href="sedsb.png" type="image/png">
+  <link rel="apple-touch-icon" href="sedsb.png">
 
   <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
   <meta property="og:type" content="website">
@@ -1425,6 +1425,127 @@
 
     .tb-btn:hover .tb-tip {
       opacity: 1
+    }
+
+    /* ===== FORM BUILDER TOOLBAR ===== */
+    .right-toolbar {
+      position: sticky;
+      top: 128px;
+      width: 52px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-self: flex-start;
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 10px 6px;
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+
+    .tb-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 9px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      width: 38px;
+      height: 38px;
+      position: relative;
+    }
+
+    .tb-btn:hover {
+      background: rgba(77, 166, 255, .15);
+      color: var(--accent);
+    }
+
+    .tb-btn .material-icons-round {
+      font-size: 20px;
+    }
+
+    .tb-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 3px 4px;
+    }
+
+    .tb-tip {
+      position: absolute;
+      left: calc(100% + 8px);
+      background: #0f1e35;
+      color: var(--text);
+      font-size: 11px;
+      white-space: nowrap;
+      padding: 3px 9px;
+      border-radius: 5px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .15s;
+      border: 1px solid var(--border);
+    }
+
+    .tb-btn:hover .tb-tip {
+      opacity: 1;
+    }
+
+    /* ===== MOBILE TOOLBAR: HORIZONTAL BOTTOM BAR (Image 2 style) ===== */
+    @media (max-width: 768px) {
+      .editor-layout {
+        padding: 14px 10px 84px !important;
+        gap: 0 !important;
+      }
+      .right-toolbar {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: 56px !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+        background: rgba(8, 16, 32, 0.96) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        padding: 0 8px env(safe-area-inset-bottom, 0px) !important;
+        box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.7) !important;
+        z-index: 1000 !important;
+        align-self: unset !important;
+        margin: 0 !important;
+      }
+      .right-toolbar .tb-btn {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 9px !important;
+        border-radius: 50% !important;
+      }
+      .right-toolbar .tb-btn .material-icons-round {
+        font-size: 22px !important;
+      }
+      .right-toolbar .tb-sep {
+        width: 1px !important;
+        height: 22px !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        margin: 0 2px !important;
+      }
+      .right-toolbar .tb-tip {
+        display: none !important;
+      }
     }
 
     /* ===== RESPONSES TAB ===== */
@@ -3017,6 +3138,10 @@
       <button class="icon-btn" onclick="loadAllFormsFromCloud(true)" title="Sync all forms from Google Drive">
         <span class="material-icons-round">cloud_sync</span>
       </button>
+      <button class="icon-btn" onclick="showTrashView()" title="Trash — view deleted forms" id="trashBtn" style="position:relative">
+        <span class="material-icons-round">delete</span>
+        <span id="trashBadge" class="hidden" style="position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1">0</span>
+      </button>
       <button class="icon-btn" onclick="showSetupModal()" title="Configure Apps Script">
         <span class="material-icons-round">settings</span>
       </button>
@@ -3095,6 +3220,44 @@
   </div>
 
   <!-- ===========================
+     TRASH VIEW (Deleted Forms)
+     =========================== -->
+  <div id="trashView" class="hidden">
+    <div class="dash-wrap">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap">
+        <button class="icon-btn" onclick="showDashboard()" title="Back to dashboard" style="background:rgba(255,255,255,0.08);border:1px solid var(--border);width:40px;height:40px;border-radius:12px">
+          <span class="material-icons-round">arrow_back</span>
+        </button>
+        <div>
+          <h2 style="font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0">
+            <span class="material-icons-round" style="color:var(--danger)">delete</span> Trash Bin
+          </h2>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0 0">Forms moved to trash can be restored or permanently deleted.</p>
+        </div>
+        <button class="btn-primary" onclick="loadTrashView()" style="margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--text)">
+          <span class="material-icons-round" style="font-size:16px">refresh</span> Refresh
+        </button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="trashLoading" style="text-align:center;padding:48px 0;color:var(--muted)">
+        <div class="spinner" style="width:32px;height:32px;margin:0 auto 14px"></div>
+        <p>Loading deleted forms...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div id="trashEmpty" class="hidden" style="text-align:center;padding:64px 24px;color:var(--muted)">
+        <span class="material-icons-round" style="font-size:56px;opacity:0.3;display:block;margin-bottom:12px">delete_sweep</span>
+        <h3 style="font-size:17px;font-weight:600;margin:0 0 6px;color:var(--text)">Trash is empty</h3>
+        <p style="font-size:13px">Forms you delete will appear here. You can restore or permanently remove them.</p>
+      </div>
+
+      <!-- Deleted forms grid -->
+      <div id="trashGrid" class="hidden" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px"></div>
+    </div>
+  </div>
+
+  <!-- ===========================
      EDITOR VIEW
      =========================== -->
   <div id="editorView" class="hidden">
@@ -3138,7 +3301,7 @@
             <p>Click the <strong>+</strong> button on the right to add your first question</p>
           </div>
         </div>
-        <!-- Right toolbar -->
+        <!-- Right toolbar: Sticky vertical sidebar on desktop (Image 3), Fixed bottom bar on mobile (Image 2) -->
         <div class="right-toolbar" id="rightToolbar">
           <button class="tb-btn" onclick="addQ('multiple_choice')" title="Add question">
             <span class="material-icons-round">add_circle_outline</span>
@@ -3815,10 +3978,14 @@
     const FORMS_KEY = window.SEDS_CONFIG?.FORMS_KEY || 'seds_forms_v2';
     const AUTH_KEY = window.SEDS_CONFIG?.AUTH_KEY || 'seds_admin_auth';
     const BASE = window.location.origin + window.location.pathname.replace(/(forms|index)\.html.*/i, '').replace(/\/?$/, '/');
-    const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
+    const DEFAULT_GAS_URL = window.SEDS_CONFIG?.GAS_URL || 'https://script.google.com/macros/s/AKfycbw12wUIO8ST1gvwHIN61TV8PdHuYRP02_VJbr9PG9aic1KLQW8Qfh4Ikw5e3wPnAYVl/exec';
     const DELETED_KEY = window.SEDS_CONFIG?.DELETED_KEY || 'seds_deleted_forms';
 
-    let GAS_URL = (window.getSedsGasUrl ? window.getSedsGasUrl() : null) || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+    // Prioritize window.SEDS_CONFIG.GAS_URL (from config.js) and sync to localStorage
+    let GAS_URL = window.SEDS_CONFIG?.GAS_URL || localStorage.getItem(GAS_KEY) || DEFAULT_GAS_URL;
+    if (window.SEDS_CONFIG?.GAS_URL && localStorage.getItem(GAS_KEY) !== window.SEDS_CONFIG.GAS_URL) {
+      localStorage.setItem(GAS_KEY, window.SEDS_CONFIG.GAS_URL);
+    }
 
     function getDeletedFormIds() {
       try {
@@ -4229,7 +4396,7 @@
     // =========================================================
     function showDashboard() {
       show('dashboardView'); show('dashHeader');
-      hide('editorView'); hide('editorHeader');
+      hide('editorView'); hide('editorHeader'); hide('trashView');
       loadAllFormsFromCloud(false);
       renderDashboard();
     }
@@ -6356,19 +6523,19 @@
 
     async function deleteCurrentForm() {
       const f = curForm(); if (!f) return;
-      if (!confirm(`Delete "${f.title || 'Untitled form'}"? This cannot be undone.`)) return;
+      if (!confirm(`Move "${f.title || 'Untitled form'}" to trash? You can restore it from Trash.`)) return;
       const formId = f.id;
       const tok = f.adminToken;
       recordDeletedFormId(formId);
       delete forms[formId];
       saveLocal();
       goToDashboard();
-      toast('Deleting form from cloud...', 'info');
+      toast('Moving form to trash...', 'info');
 
       try {
         const res = await gasPost({ action: 'deleteForm', formId: formId, adminToken: tok });
         if (res && res.success) {
-          toast('Form permanently deleted ✅', 'success');
+          toast('Form moved to trash 🗑️', 'success');
         }
       } catch (e) {
         console.warn('Cloud delete notice:', e);
@@ -6377,21 +6544,157 @@
 
     async function confirmDeleteDash(id) {
       const f = forms[id]; if (!f) return;
-      if (!confirm(`Delete "${f.title || 'Untitled form'}"? This cannot be undone.`)) return;
+      if (!confirm(`Move "${f.title || 'Untitled form'}" to trash? You can restore it from Trash.`)) return;
       const tok = f.adminToken;
       recordDeletedFormId(id);
       delete forms[id];
       saveLocal();
       renderDashboard();
-      toast('Deleting form from cloud...', 'info');
+      toast('Moving form to trash...', 'info');
 
       try {
         const res = await gasPost({ action: 'deleteForm', formId: id, adminToken: tok });
         if (res && res.success) {
-          toast('Form permanently deleted ✅', 'success');
+          toast('Form moved to trash 🗑️', 'success');
         }
       } catch (e) {
         console.warn('Cloud delete notice:', e);
+      }
+    }
+
+    // =========================================================
+    //  TRASH BIN — View, Restore, Permanently Delete
+    // =========================================================
+    function showTrashView() {
+      hide('dashboardView'); hide('editorView'); hide('editorHeader');
+      show('dashHeader'); show('trashView');
+      loadTrashView();
+    }
+
+    async function loadTrashView() {
+      const loading = document.getElementById('trashLoading');
+      const empty = document.getElementById('trashEmpty');
+      const grid = document.getElementById('trashGrid');
+      const badge = document.getElementById('trashBadge');
+
+      if (loading) { loading.style.display = 'block'; }
+      if (empty) empty.classList.add('hidden');
+      if (grid) grid.classList.add('hidden');
+
+      if (!GAS_URL && !DEFAULT_GAS_URL) {
+        if (loading) loading.style.display = 'none';
+        if (empty) empty.classList.remove('hidden');
+        toast('Apps Script not connected — cannot load trash', 'warning');
+        return;
+      }
+
+      try {
+        const res = await gasPost({ action: 'listDeletedForms' });
+        if (loading) loading.style.display = 'none';
+
+        if (!res || !res.success) {
+          toast('Error loading trash: ' + (res?.error || 'Unknown'), 'error');
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+
+        const deleted = res.forms || [];
+
+        // Update badge
+        if (badge) {
+          if (deleted.length > 0) {
+            badge.textContent = deleted.length;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+
+        if (deleted.length === 0) {
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+
+        if (grid) {
+          grid.classList.remove('hidden');
+          grid.innerHTML = deleted.map(f => {
+            const dateStr = f.deletedAt ? new Date(f.deletedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+            const badge = f.published
+              ? `<span style="font-size:11px;color:#10b981;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px"><span class="material-icons-round" style="font-size:11px">check_circle</span>Published</span>`
+              : `<span style="font-size:11px;color:var(--muted);background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px"><span class="material-icons-round" style="font-size:11px">edit</span>Draft</span>`;
+            return `
+              <div style="background:rgba(255,82,82,0.04);border:1px solid rgba(255,82,82,0.18);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;position:relative;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 24px rgba(255,82,82,0.15)'" onmouseout="this.style.boxShadow='none'">
+                <div style="position:absolute;top:14px;right:14px;display:flex;gap:6px">
+                  ${badge}
+                </div>
+                <div>
+                  <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;padding-right:70px">${esc(f.title || 'Untitled form')}</div>
+                  <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px">
+                    <span class="material-icons-round" style="font-size:14px">schedule</span>
+                    Deleted ${dateStr}
+                  </div>
+                </div>
+                <div style="font-size:12px;color:var(--muted);display:flex;gap:12px">
+                  <span style="display:flex;align-items:center;gap:4px"><span class="material-icons-round" style="font-size:13px">quiz</span>${f.questionCount || 0} questions</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:4px">
+                  <button onclick="restoreFormFromTrash('${esc(f.id)}')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;border:1px solid rgba(77,166,255,0.35);background:rgba(77,166,255,0.1);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(77,166,255,0.2)'" onmouseout="this.style.background='rgba(77,166,255,0.1)'">
+                    <span class="material-icons-round" style="font-size:16px">restore</span> Restore
+                  </button>
+                  <button onclick="permanentlyDeleteFormFromTrash('${esc(f.id)}','${esc(f.title || 'Untitled form')}')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,82,82,0.35);background:rgba(255,82,82,0.08);color:var(--danger);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,82,82,0.18)'" onmouseout="this.style.background='rgba(255,82,82,0.08)'">
+                    <span class="material-icons-round" style="font-size:16px">delete_forever</span> Delete Forever
+                  </button>
+                </div>
+              </div>`;
+          }).join('');
+        }
+      } catch (err) {
+        if (loading) loading.style.display = 'none';
+        if (empty) empty.classList.remove('hidden');
+        console.warn('loadTrashView error:', err);
+        toast('Failed to load trash', 'error');
+      }
+    }
+
+    async function restoreFormFromTrash(formId) {
+      if (!formId) return;
+      toast('Restoring form...', 'info');
+      try {
+        const res = await gasPost({ action: 'restoreForm', formId: formId });
+        if (res && res.success) {
+          // Remove from local deleted set
+          unrecordDeletedFormId(formId);
+          // Reload from cloud to get restored form back into dashboard
+          toast('Form restored! ✅ Reloading...', 'success');
+          await loadAllFormsFromCloud(false);
+          // Refresh trash view
+          loadTrashView();
+          const ogMsg = res.ogPage?.success ? ' OG page re-published on GitHub.' : '';
+          if (ogMsg) setTimeout(() => toast('GitHub OG page re-published ✅', 'success'), 1500);
+        } else {
+          toast('Restore failed: ' + (res?.error || 'Unknown error'), 'error');
+        }
+      } catch (e) {
+        console.warn('restoreForm error:', e);
+        toast('Restore failed: ' + e.message, 'error');
+      }
+    }
+
+    async function permanentlyDeleteFormFromTrash(formId, title) {
+      if (!formId) return;
+      if (!confirm(`⚠️ Permanently delete "${title}"?\n\nThis will:\n• Remove it from Google Drive (unrecoverable)\n• Delete the GitHub OG share page\n\nThis CANNOT be undone.`)) return;
+      toast('Permanently deleting...', 'info');
+      try {
+        const res = await gasPost({ action: 'permanentlyDeleteForm', formId: formId });
+        if (res && res.success) {
+          recordDeletedFormId(formId);  // keep in local blacklist
+          toast('Permanently deleted ✅', 'success');
+          loadTrashView();
+        } else {
+          toast('Delete failed: ' + (res?.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        toast('Delete failed: ' + e.message, 'error');
       }
     }
 
@@ -6507,6 +6810,7 @@
     // =========================================================
     init();
   </script>
+
   <!-- Global type dropdown — lives at body level to escape backdrop-filter stacking contexts -->
   <div id="globalTypeDD"></div>
 </body>

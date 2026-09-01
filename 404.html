@@ -8,8 +8,8 @@
   <title>Kumaraguru SEDS | Forms & Links</title>
   <meta name="title" content="Kumaraguru SEDS | Forms & Links">
   <meta name="description" content="Connecting you to Kumaraguru SEDS forms, events, and resources.">
-  <link rel="icon" href="SEDS.png" type="image/png">
-  <link rel="apple-touch-icon" href="SEDS.png">
+  <link rel="icon" href="sedsb.png" type="image/png">
+  <link rel="apple-touch-icon" href="sedsb.png">
 
   <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
   <meta property="og:type" content="website">
@@ -401,7 +401,7 @@
       }
 
       // 3. Fallback: Check Apps Script for latest dynamic links
-      const SHORTENER_APPS_SCRIPT = (window.SEDS_CONFIG && window.SEDS_CONFIG.GAS_URL) || 'https://script.google.com/macros/s/AKfycbyt6JK0lWVMOeZDxwEsIykZN_3LdsJxl__JiEc4W-pCCHKA8wHpVzrbctCAugws7RE/exec';
+      const SHORTENER_APPS_SCRIPT = (window.SEDS_CONFIG && window.SEDS_CONFIG.GAS_URL) || 'https://script.google.com/macros/s/AKfycbw12wUIO8ST1gvwHIN61TV8PdHuYRP02_VJbr9PG9aic1KLQW8Qfh4Ikw5e3wPnAYVl/exec';
       try {
         const gasRes = await fetch(`${SHORTENER_APPS_SCRIPT}?action=lookupSlug&slug=${encodeURIComponent(slug)}`);
         if (gasRes.ok) {
